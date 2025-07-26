@@ -18,7 +18,7 @@ function Home() {
           <h1 className="w-full text-gradient font-nunito text-h1-sm md:text-h1-md lg:text-h1 leading-h1-mobile md:leading-h1 font-bold drop-shadow-main leading-[124px]">
             Scout it out
           </h1>
-          <h2 className="font-borel text-h2-sm md:text-h2 leading-h2-sm md:leading-h2 dark:text-white">
+          <h2 className="font-borel text-h2 md:text-h2-subhead md:leading-h2-subhead leading-h2 dark:text-white">
             Search. Scout. Scour.
           </h2>
         </section>

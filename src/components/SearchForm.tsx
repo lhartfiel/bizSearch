@@ -2,9 +2,8 @@ import { useState, useEffect, useTransition } from "react";
 import { useForm, formOptions, FieldInfo } from "@tanstack/react-form";
 import { QueryClient } from "@tanstack/react-query";
 import { Result } from "./Result";
-import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-import { PropsWithChildren } from "react";
-import "react-loading-skeleton/dist/skeleton.css";
+import { SkeletonWrapper } from "./SkeletonWrapper";
+import { InputField } from "./InputField";
 
 interface searchResultType {
   places: any[];
@@ -19,22 +18,6 @@ const initialSearchResult: searchResultType = {
 };
 
 const MAX_RESULTS = 25; // Max results per page
-
-function Box({ children }: PropsWithChildren<unknown>) {
-  return (
-    <div
-      style={{
-        borderRadius: "8px",
-        display: "flex",
-        lineHeight: 1,
-        marginBottom: "0.5rem",
-        width: "100%",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
 
 const SearchForm = () => {
   const [searchName, setSearchName] = useState("");
@@ -200,10 +183,8 @@ const SearchForm = () => {
       try {
         setSearchName(value.name);
         setSearchLocation(value.location);
-        console.log("name", value.name);
-        console.log("loc", value.location);
         startTransition(async () => {
-          const data = await queryClient.fetchQuery({
+          await queryClient.fetchQuery({
             queryKey: ["search", value.name + value.location],
             queryFn: () =>
               fetchInitialResults(value.name, value.location, "initial"),
@@ -214,6 +195,19 @@ const SearchForm = () => {
       }
     },
   });
+
+  const inputs = [
+    {
+      name: "name",
+      label: "Name (Coffee, Dunkin Donuts)",
+      placeholder: "Enter Name",
+    },
+    {
+      name: "location",
+      label: "Location (Chicago)",
+      placeholder: "Enter Location",
+    },
+  ];
 
   console.log("search RES", searchResults, searchResults?.places?.length);
   console.log("pending", isPending);
@@ -227,46 +221,17 @@ const SearchForm = () => {
           e.stopPropagation();
         }}
       >
-        <form.Field
-          name="name"
-          children={(field) => (
-            <span className="col-start-1 col-span-12 sm:col-span-6 md:col-span-4 md:col-start-3 lg:col-span-3 lg:col-start-4">
-              <label
-                className="block text-zinc-500 dark:text-white text-left text-sm uppercase tracking-wide mb-2"
-                htmlFor="name"
-              >
-                Name (Coffee, Dunkin Donuts)
-              </label>
-              <input
-                className="w-full border-1 border-gray-300 rounded-md p-2 placeholder-zinc-400 text-zinc-600 dark:placeholder-white dark:text-white"
-                placeholder="Enter Name"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-              />
-            </span>
-          )}
-        />
-        <form.Field
-          name="location"
-          children={(field) => (
-            <span className="col-start-1 col-span-12 sm:col-start-7 sm:col-span-6  md:col-span-4 lg:col-span-3 lg:col-start-7">
-              <label
-                className="block text-zinc-500 dark:text-white text-left text-sm uppercase tracking-wide mb-2"
-                htmlFor="location"
-              >
-                Location (Chicago)
-              </label>
-              <input
-                className="w-full border-1 border-gray-300 rounded-md p-2 mr-2 placeholder-zinc-400 text-zinc-600 dark:placeholder-white dark:text-white"
-                placeholder="Enter Location"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-              />
-            </span>
-          )}
-        />
+        {inputs.map((input, idx) => {
+          return (
+            <InputField
+              name={input.name}
+              key={input.name}
+              label={input.label}
+              placeholder={input.placeholder}
+              form={form}
+            />
+          );
+        })}
         <div className="col-span-12 flex flex-wrap gap-4 justify-center w-full mt-5">
           <div className="button-wrapper btn-gradient rounded-full w-full sm:w-auto p-[2px]">
             <button
@@ -295,22 +260,7 @@ const SearchForm = () => {
       <section className="grid col-span-12 grid-cols-subgrid">
         {isPending &&
           Array.from({ length: 4 }).map((_, idx) => {
-            return (
-              <div className="even:lg:col-start-7 odd:lg:col-start-3 lg:col-span-4 w-full rounded-lg bg-white mb-4 p-5 shadow-card">
-                <SkeletonTheme duration={2} height={12}>
-                  <Box>
-                    <Skeleton
-                      height={10}
-                      baseColor="#d1d5db"
-                      highlightColor="#9ca3af"
-                      containerClassName="flex-1"
-                      count={4}
-                      className="flex mb-2"
-                    />
-                  </Box>
-                </SkeletonTheme>
-              </div>
-            );
+            return <SkeletonWrapper />;
           })}
         {!isPending &&
           searchResults?.places?.length > 0 &&

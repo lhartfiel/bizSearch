@@ -43,14 +43,14 @@
   --text-h1: 124px;
   --text-h1-sm: 56px;
   --text-h1-md: 84px;
-  --text-h2: 36px;
-  --text-h2-sm: 24px;
+  --text-h2-subhead: 36px;
+  --text-h2: 24px;
   --text-body: 18px;
 
   --leading-h1: 136px;
   --leading-h1-mobile: 72px;
-  --leading-h2: 56px;
-  --leading-h2-sm: 32px;
+  --leading-h2-subhead: 56px;
+  --leading-h2: 32px;
 
   --leading-body: 24px;
 
