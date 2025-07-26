@@ -221,7 +221,7 @@ const SearchForm = () => {
           e.stopPropagation();
         }}
       >
-        {inputs.map((input, idx) => {
+        {inputs.map((input) => {
           return (
             <InputField
               name={input.name}
