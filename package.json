@@ -1,0 +1,46 @@
+{
+  "name": "bizsearch",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/free-regular-svg-icons": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@tailwindcss/vite": "^4.1.11",
+    "@tanstack/react-form": "^1.14.0",
+    "@tanstack/react-query": "^5.81.5",
+    "@tanstack/react-router": "^1.125.4",
+    "@tanstack/react-start": "^1.125.4",
+    "libphonenumber-js": "^1.12.9",
+    "prettier": "^3.6.2",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-loading-skeleton": "^3.5.0",
+    "tailwindcss": "^4.1.11",
+    "vite": "^7.0.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@tanstack/eslint-plugin-query": "^5.81.2",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "eslint": "^9.32.0",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.3.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.38.0",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}

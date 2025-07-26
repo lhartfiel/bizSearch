@@ -1,0 +1,39 @@
+import { createServerFileRoute } from "@tanstack/react-start/server";
+
+const FOURSQUARE_API_KEY = process.env.FOURSQUARE_API_KEY;
+const LIMIT = 25;
+
+export const ServerRoute = createServerFileRoute(
+  "/api/foursquareSearch",
+).methods({
+  GET: async ({ request }) => {
+    console.log("api", FOURSQUARE_API_KEY);
+    const url = new URL(request.url);
+    const searchName = url.searchParams.get("name");
+    const searchLocation = url.searchParams.get("location");
+    const searchNextPage = url.searchParams.get("fourNextPage");
+    const apiUrl = `https://places-api.foursquare.com/places/search?query=${searchName}&near=${searchLocation}&limit=${LIMIT}&cursor=${searchNextPage}`;
+
+    const response = await fetch(apiUrl, {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        "X-Places-Api-Version": "2025-06-17",
+        authorization: `Bearer ${process.env.FOURSQUARE_API_KEY}`,
+      },
+    });
+
+    const link = response?.headers?.get("link");
+    const nextPageToken = link?.match(/cursor=([^&]+)/)?.[1];
+    const json = await response.json();
+    const jsonWithNextPage = {
+      ...json,
+      nextPageToken: nextPageToken || null,
+    };
+    return new Response(JSON.stringify(jsonWithNextPage), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  },
+});
