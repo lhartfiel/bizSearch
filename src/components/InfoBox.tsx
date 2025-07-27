@@ -1,0 +1,37 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import { useState } from "react";
+
+const InfoBox = ({
+  rating,
+  ratingCount,
+}: {
+  rating: number;
+  ratingCount: number;
+}) => {
+  const [showPopup, setShowPopup] = useState(false);
+
+  return (
+    <>
+      {showPopup && (
+        <div className="absolute bottom-[26px] right-0 popup bg-bright-salmon rounded-sm p-3 w-[180px] shadow-lg">
+          <p className="leading-5 text-[16px] text-white">
+            This is a rating of <span className="font-black">{rating}</span> out
+            of 5 based on a total number of {ratingCount} ratings.
+          </p>
+        </div>
+      )}
+      <div
+        onMouseEnter={() => setShowPopup(true)}
+        onMouseLeave={() => setShowPopup(false)}
+      >
+        <FontAwesomeIcon
+          icon={faCircleInfo}
+          className={`text-4 ml-1 mt-0 shadow-lg ${showPopup ? "text-white" : "text-gray-700"}`}
+        />
+      </div>
+    </>
+  );
+};
+
+export { InfoBox };

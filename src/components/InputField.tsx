@@ -28,7 +28,7 @@ const InputField = ({ name, label, placeholder, form }: InputFieldProps) => {
             {label}
           </label>
           <input
-            className="w-full border-1 border-gray-300 rounded-md p-2 placeholder-zinc-400 text-zinc-600 dark:placeholder-white dark:text-white"
+            className="w-full border-1 border-gray-500 rounded-md p-2 placeholder-zinc-400 text-zinc-600 dark:placeholder-white dark:text-white mb-6 md:mb-0"
             placeholder={placeholder}
             value={field.state.value}
             onBlur={field.handleBlur}

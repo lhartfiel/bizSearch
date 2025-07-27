@@ -26,9 +26,9 @@ const SearchForm = () => {
     useState<searchResultType>(initialSearchResult);
   const [fetchMoreNum, setFetchMoreNum] = useState(1);
   const [isPending, startTransition] = useTransition();
+  const [isEmpty, setIsEmpty] = useState(false);
 
   const queryClient = new QueryClient();
-  const searchResultsNumber = searchResults.places.length;
 
   const dedupResponses = (responses) => {
     return responses.filter((obj, index, self) => {
@@ -40,12 +40,14 @@ const SearchForm = () => {
     return num?.replace(/[^\d+]/g, "");
   };
 
-  const fetchGoogleResults = async (name, location, initialNext) => {
+  const fetchGoogleResults = async (
+    name: string,
+    location: string,
+    initialNext,
+  ) => {
     const nextParam = initialNext === "initial" ? 0 : searchResults.next.length;
-    console.log("nextParam", nextParam, typeof nextParam);
     const googleUrl =
       nextParam && nextParam !== 0 ? `&pagetoken=${searchResults.next}` : "";
-    console.log("googleUrl", googleUrl);
     const googleTerm = name + location;
     const googleRes = await fetch(
       `/api/googleSearch?searchTerm=${encodeURIComponent(googleTerm)}${googleUrl}`,
@@ -58,8 +60,8 @@ const SearchForm = () => {
     }
 
     const googleJson = await googleRes.json();
-    console.log("RES", googleJson);
-    const googleNewObj = googleJson.places.map((item) => {
+    if (!googleJson.places) setIsEmpty(true);
+    const googleNewObj = googleJson?.places.map((item) => {
       const num = cleanedPhoneNum(item?.nationalPhoneNumber);
 
       if (!item.formattedAddress && !item?.displayName.text) {
@@ -81,7 +83,7 @@ const SearchForm = () => {
     return { googleNewObj, googleJson };
   };
 
-  const fetchFoursquareResults = async (name, location) => {
+  const fetchFoursquareResults = async (name: string, location: string) => {
     console.log("NEXT", searchResults?.fourNextPage);
     const foursquareUrl =
       searchResults?.fourNextPage !== null
@@ -119,7 +121,11 @@ const SearchForm = () => {
     });
   };
 
-  const fetchMainResults = async (name, location, nextResults) => {
+  const fetchMainResults = async (
+    name: string,
+    location: string,
+    nextResults,
+  ) => {
     const results = await fetchGoogleResults(name, location, nextResults);
 
     setSearchResults((prev) => {
@@ -138,7 +144,11 @@ const SearchForm = () => {
     }
   };
 
-  const fetchInitialResults = async (name, location, nextParams) => {
+  const fetchInitialResults = async (
+    name: string,
+    location: string,
+    nextParams,
+  ) => {
     try {
       // ALWAYS fetch the initial Google results, which only return a max of 20
       await fetchMainResults(name, location, nextParams);
@@ -147,15 +157,13 @@ const SearchForm = () => {
     }
   };
 
-  const fetchTermResults = async (name, location) => {
+  const fetchTermResults = async (name: string, location: string) => {
     // TODO: Extract all API calls to separate file
     try {
       if (searchResults.next) {
         // If there is a next page token, fetch the next page of results from Google
-        console.log("fetch goog");
         await fetchMainResults(name, location, searchResults.next);
       } else {
-        console.log("fetch foursq");
         await fetchFoursquareResults(name, location);
       }
     } catch (err) {
@@ -170,8 +178,6 @@ const SearchForm = () => {
     }
   };
 
-  console.log("searchResults", searchResults);
-
   const form = useForm({
     defaultValues: {
       name: "",
@@ -179,7 +185,7 @@ const SearchForm = () => {
     },
     onSubmit: async ({ value }) => {
       setSearchResults(initialSearchResult);
-
+      setIsEmpty(false);
       try {
         setSearchName(value.name);
         setSearchLocation(value.location);
@@ -269,6 +275,12 @@ const SearchForm = () => {
               return <Result result={result} key={result?.phone} index={idx} />;
             }
           })}
+        {!isPending && isEmpty && (
+          <h2 className="text-h2 block col-span-8 col-start-3 md:col-span-4 md:col-start-5 text-center text-bright-salmon">
+            Oops! Looks like we couldn't find any search results. Please try
+            again.
+          </h2>
+        )}
         {(searchResults.next?.length > 0 ||
           searchResults.fourNextPage?.length > 0 ||
           searchResults.places.length > MAX_RESULTS * fetchMoreNum) && (
