@@ -2,14 +2,19 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { SearchForm } from "../components/SearchForm";
 import { ThemeSwitch } from "../components/ThemeSwitch";
-import { useContext } from "react";
-import { ThemeContext } from "../ThemeContext";
+import {
+  SearchResultContext,
+  SearchResultDispatchContext,
+} from "../contexts/SearchResultContext";
+import { useReducer } from "react";
+import { resultsReducer } from "../contexts/SearchResultContext";
 
 export const Route = createFileRoute("/")({
   component: Home,
 });
 
 function Home() {
+  const [results, dispatch] = useReducer(resultsReducer, {});
   return (
     <article className="light-gradient dark-gradient flex flex-wrap justify-center items-start text-center min-h-screen">
       <span className="lg:mx-auto lg:max-w-7xl xxl:max-w-[1440px] w-full mx-6 py-8">
@@ -23,7 +28,11 @@ function Home() {
           </h2>
         </section>
         <section className="grid grid-cols-12 w-full gap-6">
-          <SearchForm />
+          <SearchResultContext value={results}>
+            <SearchResultDispatchContext value={dispatch}>
+              <SearchForm />
+            </SearchResultDispatchContext>
+          </SearchResultContext>
         </section>
       </span>
     </article>

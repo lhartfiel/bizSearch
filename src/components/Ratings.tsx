@@ -10,7 +10,7 @@ const Ratings = ({ rating }: { rating: number | string }) => {
       {/* Display the empty 5 stars */}
       {Array.from({ length: totalStars }, (_, index) => {
         return (
-          <div className="text-salmon flex space-x-1">
+          <div key={`base-${index}`} className="text-salmon flex space-x-1">
             <StarIconOutline key={`outline-${index}`} />
           </div>
         );
@@ -25,7 +25,10 @@ const Ratings = ({ rating }: { rating: number | string }) => {
         }}
       >
         {Array.from({ length: totalStars }).map((_, index) => (
-          <div className="text-bright-salmon flex space-x-1">
+          <div
+            key={`filled-${index}`}
+            className="text-bright-salmon flex space-x-1"
+          >
             <StarIconFilled key={`fill-${index}`} />
           </div>
         ))}

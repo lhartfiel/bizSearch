@@ -1,170 +1,64 @@
-import { useState, useEffect, useTransition } from "react";
-import { useForm, formOptions, FieldInfo } from "@tanstack/react-form";
+import { useState, useTransition } from "react";
+import { useForm } from "@tanstack/react-form";
 import { QueryClient } from "@tanstack/react-query";
 import { Result } from "./Result";
 import { SkeletonWrapper } from "./SkeletonWrapper";
 import { InputField } from "./InputField";
-
-interface searchResultType {
-  places: any[];
-  next: string;
-  fourNextPage: string;
-}
-
-const initialSearchResult: searchResultType = {
-  places: [],
-  next: "",
-  fourNextPage: "",
-};
-
-const MAX_RESULTS = 25; // Max results per page
+import { MAX_RESULTS } from "../helpers/constants";
+import { fetchMainResults } from "../api/fetchMainResults";
+import { fetchFoursquareResults } from "../api/fetchFoursquareResults";
+import { useReducer } from "react";
+import { resultsReducer } from "../contexts/SearchResultContext";
+import { initialSearchResult } from "../helpers/constants";
 
 const SearchForm = () => {
   const [searchName, setSearchName] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
-  const [searchResults, setSearchResults] =
-    useState<searchResultType>(initialSearchResult);
   const [fetchMoreNum, setFetchMoreNum] = useState(1);
   const [isPending, startTransition] = useTransition();
   const [isEmpty, setIsEmpty] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const [searchResults, dispatch] = useReducer(
+    resultsReducer,
+    initialSearchResult,
+  );
 
   const queryClient = new QueryClient();
-
-  const dedupResponses = (responses) => {
-    return responses.filter((obj, index, self) => {
-      return index === self.findIndex((t) => t.phone === obj.phone);
-    });
-  };
-
-  const cleanedPhoneNum = (num) => {
-    return num?.replace(/[^\d+]/g, "");
-  };
-
-  const fetchGoogleResults = async (
-    name: string,
-    location: string,
-    initialNext,
-  ) => {
-    const nextParam = initialNext === "initial" ? 0 : searchResults.next.length;
-    const googleUrl =
-      nextParam && nextParam !== 0 ? `&pagetoken=${searchResults.next}` : "";
-    const googleTerm = name + location;
-    const googleRes = await fetch(
-      `/api/googleSearch?searchTerm=${encodeURIComponent(googleTerm)}${googleUrl}`,
-    );
-
-    if (!googleRes.ok) {
-      const text = await googleRes.text();
-      console.error("Fetch failed:", text);
-      throw new Error("Failed to fetch");
-    }
-
-    const googleJson = await googleRes.json();
-    if (!googleJson.places) setIsEmpty(true);
-    const googleNewObj = googleJson?.places.map((item) => {
-      const num = cleanedPhoneNum(item?.nationalPhoneNumber);
-
-      if (!item.formattedAddress && !item?.displayName.text) {
-        // Don't return any results that don't have an address or name
-        return;
-      }
-      return {
-        address: item?.formattedAddress,
-        directions: item?.googleMapsLinks?.directionsUri,
-        name: item?.displayName.text,
-        phone: num,
-        price: item?.priceRange,
-        rating: item?.rating,
-        ratingCount: item?.userRatingCount,
-        summary: item?.generativeSummary?.overview?.text,
-        webUrl: item?.websiteUri,
-      };
-    });
-    return { googleNewObj, googleJson };
-  };
-
-  const fetchFoursquareResults = async (name: string, location: string) => {
-    console.log("NEXT", searchResults?.fourNextPage);
-    const foursquareUrl =
-      searchResults?.fourNextPage !== null
-        ? `&fourNextPage=${searchResults.fourNextPage}`
-        : "";
-    const foursquareRes = await fetch(
-      `/api/foursquareSearch?name=${encodeURIComponent(name)}&location=${location}${foursquareUrl}`,
-    );
-    const foursquareJson = await foursquareRes.json();
-    console.log("foursquareJson", foursquareJson);
-    const foursquareNewObj = foursquareJson.results.map((item) => {
-      const num = cleanedPhoneNum(item?.tel);
-
-      if (!item.location.formatted_address && !item.name) {
-        return;
-      }
-
-      return {
-        name: item?.name,
-        address: item?.location.formatted_address,
-        phone: num,
-        rating: item?.rating,
-        webUrl: item?.website,
-      };
-    });
-    setSearchResults((prev) => {
-      const placesArray = [...prev.places, ...foursquareNewObj];
-      const uniquePlaces = dedupResponses(placesArray);
-      const newArray = {
-        places: uniquePlaces || [],
-        next: "",
-        fourNextPage: foursquareJson.nextPageToken || "",
-      };
-      return newArray;
-    });
-  };
-
-  const fetchMainResults = async (
-    name: string,
-    location: string,
-    nextResults,
-  ) => {
-    const results = await fetchGoogleResults(name, location, nextResults);
-
-    setSearchResults((prev) => {
-      const placesArray = [...prev.places, ...results.googleNewObj];
-      const uniquePlaces = dedupResponses(placesArray);
-      const newArray = {
-        places: uniquePlaces || [],
-        next: results.googleJson.nextPageToken,
-      };
-      return newArray;
-    });
-
-    // If the results returned from the Google Response are less than the max, fetch more by calling Foursquare
-    if (results?.googleNewObj?.length < MAX_RESULTS) {
-      await fetchFoursquareResults(name, location);
-    }
-  };
 
   const fetchInitialResults = async (
     name: string,
     location: string,
-    nextParams,
+    nextParams: string,
   ) => {
     try {
       // ALWAYS fetch the initial Google results, which only return a max of 20
-      await fetchMainResults(name, location, nextParams);
+      await fetchMainResults(
+        name,
+        location,
+        nextParams,
+        dispatch,
+        searchResults,
+        setIsEmpty,
+      );
     } catch (err) {
       console.error(err);
     }
   };
 
   const fetchTermResults = async (name: string, location: string) => {
-    // TODO: Extract all API calls to separate file
     try {
       if (searchResults.next) {
         // If there is a next page token, fetch the next page of results from Google
-        await fetchMainResults(name, location, searchResults.next);
+        await fetchMainResults(
+          name,
+          location,
+          searchResults.next,
+          dispatch,
+          searchResults,
+        );
       } else {
-        await fetchFoursquareResults(name, location);
+        await fetchFoursquareResults(name, location, dispatch, searchResults);
       }
     } catch (err) {
       console.error(err);
@@ -184,8 +78,11 @@ const SearchForm = () => {
       location: "",
     },
     onSubmit: async ({ value }) => {
-      setSearchResults(initialSearchResult);
       setIsEmpty(false);
+      setHasSearched(true);
+      dispatch({
+        type: "clear",
+      });
       try {
         setSearchName(value.name);
         setSearchLocation(value.location);
@@ -217,6 +114,7 @@ const SearchForm = () => {
 
   console.log("search RES", searchResults, searchResults?.places?.length);
   console.log("pending", isPending);
+  console.log("empty", isEmpty);
 
   return (
     <>
@@ -245,8 +143,15 @@ const SearchForm = () => {
               type="reset"
               onClick={(event) => {
                 event.preventDefault();
+                setIsEmpty(false);
+                setHasSearched(false);
                 startTransition(() => {
-                  setSearchResults(initialSearchResult);
+                  dispatch({
+                    type: "clear",
+                    places: initialSearchResult.places,
+                    next: initialSearchResult.next,
+                    fourNextPage: initialSearchResult.fourNextPage,
+                  });
                 });
                 form.reset();
               }}
@@ -270,20 +175,21 @@ const SearchForm = () => {
           })}
         {!isPending &&
           searchResults?.places?.length > 0 &&
-          searchResults?.places.map((result, idx) => {
+          searchResults?.places.map((result, idx: number) => {
             if (idx + 1 <= MAX_RESULTS * fetchMoreNum) {
               return <Result result={result} key={result?.phone} index={idx} />;
             }
           })}
-        {!isPending && isEmpty && (
+        {!isPending && hasSearched && searchResults.places.length === 0 && (
           <h2 className="text-h2 block col-span-8 col-start-3 md:col-span-4 md:col-start-5 text-center text-bright-salmon">
             Oops! Looks like we couldn't find any search results. Please try
             again.
           </h2>
         )}
-        {(searchResults.next?.length > 0 ||
-          searchResults.fourNextPage?.length > 0 ||
-          searchResults.places.length > MAX_RESULTS * fetchMoreNum) && (
+        {(searchResults?.next?.length > 0 ||
+          searchResults?.fourNextPage?.length > 0 ||
+          (searchResults?.places &&
+            searchResults?.places.length > MAX_RESULTS * fetchMoreNum)) && (
           <button
             className="w-full col-span-2 col-start-6 mt-4 text-white bg-[image:var(--bg-button)] hover:bg-[image:var(--bg-button-hover)] shadow-none transition duration-300 hover:shadow-xl hover:cursor-pointer py-4 px-8 rounded-full font-bold uppercase"
             onClick={handleMoreResults}

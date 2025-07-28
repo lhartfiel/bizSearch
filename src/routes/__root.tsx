@@ -10,7 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { NotFound } from "../components/NotFound";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeContext, ThemeDispatchContext } from "../ThemeContext";
+import { ThemeContext, ThemeDispatchContext } from "../contexts/ThemeContext";
 import { useReducer } from "react";
 
 const queryClient = new QueryClient();
