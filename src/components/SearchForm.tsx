@@ -7,11 +7,15 @@ import { InputField } from "./InputField";
 import { MAX_RESULTS } from "../helpers/constants";
 import { fetchMainResults } from "../api/fetchMainResults";
 import { fetchFoursquareResults } from "../api/fetchFoursquareResults";
-import { useReducer } from "react";
-import { resultsReducer } from "../contexts/SearchResultContext";
+import { useContext } from "react";
+import {
+  SearchResultContext,
+  SearchResultDispatchContext,
+} from "../contexts/SearchResultContext";
 import { initialSearchResult } from "../helpers/constants";
+import { memo } from "react";
 
-const SearchForm = () => {
+const SearchForm = memo(() => {
   const [searchName, setSearchName] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [fetchMoreNum, setFetchMoreNum] = useState(1);
@@ -19,10 +23,8 @@ const SearchForm = () => {
   const [isEmpty, setIsEmpty] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const [searchResults, dispatch] = useReducer(
-    resultsReducer,
-    initialSearchResult,
-  );
+  const searchResults = useContext(SearchResultContext);
+  const dispatch = useContext(SearchResultDispatchContext);
 
   const queryClient = new QueryClient();
 
@@ -200,6 +202,6 @@ const SearchForm = () => {
       </section>
     </>
   );
-};
+});
 
 export { SearchForm };

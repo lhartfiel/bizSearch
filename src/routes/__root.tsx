@@ -12,6 +12,11 @@ import { NotFound } from "../components/NotFound";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeContext, ThemeDispatchContext } from "../contexts/ThemeContext";
 import { useReducer } from "react";
+import {
+  SearchResultContext,
+  SearchResultDispatchContext,
+} from "../contexts/SearchResultContext";
+import { resultsReducer } from "../contexts/SearchResultContext";
 
 const queryClient = new QueryClient();
 
@@ -48,10 +53,15 @@ function themeReducer(theme, action) {
 }
 
 function RootComponent() {
+  const [results, dispatch] = useReducer(resultsReducer, {});
   return (
     <RootDocument>
       <QueryClientProvider client={queryClient}>
-        <Outlet />
+        <SearchResultContext.Provider value={results}>
+          <SearchResultDispatchContext.Provider value={dispatch}>
+            <Outlet />
+          </SearchResultDispatchContext.Provider>
+        </SearchResultContext.Provider>
       </QueryClientProvider>
     </RootDocument>
   );
