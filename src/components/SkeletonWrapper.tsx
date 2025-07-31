@@ -7,7 +7,7 @@ function Box({ children }: PropsWithChildren<unknown>) {
     <div
       style={{
         borderRadius: "8px",
-        display: "flex",
+        display: "flex flex-wrap",
         lineHeight: 1,
         marginBottom: "0.5rem",
         width: "100%",
@@ -18,19 +18,40 @@ function Box({ children }: PropsWithChildren<unknown>) {
   );
 }
 
+const skeletonData = [
+  {
+    height: 16,
+    customClass: "mb-4 w-full",
+    count: 1,
+  },
+  {
+    height: 11,
+    customClass: "flex-wrap w-full mb-2",
+    count: 2,
+  },
+  {
+    height: 11,
+    customClass: "mr-0 ml-auto w-1/3 mt-3",
+    count: 1,
+  },
+];
+
 const SkeletonWrapper = () => {
   return (
     <div className="col-start-1 col-span-12 even:md:col-start-7 odd:md:col-start-2 md:col-span-5 even:lg:col-start-7 odd:lg:col-start-3 lg:col-span-4 w-full rounded-lg bg-white mb-4 p-5 shadow-card">
       <SkeletonTheme duration={2} height={12}>
         <Box>
-          <Skeleton
-            height={10}
-            baseColor="#d1d5db"
-            highlightColor="#9ca3af"
-            containerClassName="flex-1"
-            count={4}
-            className="flex mb-2"
-          />
+          {skeletonData.map((skeleton) => {
+            return (
+              <Skeleton
+                height={skeleton.height}
+                baseColor="#d1d5db"
+                highlightColor="#9ca3af"
+                containerClassName={`flex ${skeleton.customClass}`}
+                count={skeleton.count}
+              />
+            );
+          })}
         </Box>
       </SkeletonTheme>
     </div>
