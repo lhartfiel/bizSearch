@@ -7,6 +7,7 @@ import { initialSearchResult, MAX_RESULTS } from "../helpers/constants";
 import { fetchMainResults } from "../api/fetchMainResults";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useStore } from "@tanstack/react-form";
+import { Button } from "./Button";
 
 const SearchForm = memo(() => {
   const [searchName, setSearchName] = useState("");
@@ -43,6 +44,7 @@ const SearchForm = memo(() => {
   });
 
   useEffect(() => {
+    // Set isSubmitted to false once data is finished being fetched
     if (!isFetching && isSubmitted) {
       setIsSubmitted(false);
     }
@@ -115,6 +117,18 @@ const SearchForm = memo(() => {
     }
   }, [nameValue, locationValue]);
 
+  interface ResetEvent
+    extends React.SyntheticEvent<HTMLButtonElement | HTMLFormElement> {}
+
+  const handleReset = (event: ResetEvent): void => {
+    event.preventDefault();
+    setIsSubmitted(false);
+    setIsEmpty(false);
+    setSearchName(""); // clears current query
+    setSearchLocation("");
+    form.reset();
+  };
+
   return (
     <>
       <form
@@ -136,30 +150,25 @@ const SearchForm = memo(() => {
           );
         })}
         <div className="col-span-12 flex flex-wrap gap-4 justify-center w-full mt-5">
-          <div className="button-wrapper btn-gradient rounded-full w-full sm:w-auto p-[2px]">
-            <button
-              className="hover:cursor-pointer bg-white bg-red-500 dark:bg-gradient-dark-start py-2 px-6 rounded-full shadow-none transition-shadow duration-300 hover:shadow-xl w-full sm:w-[180px] dark:text-white font-bold uppercase"
+          <div
+            className={`${!nameValue || !locationValue ? "opacity-50" : "opacity-100"} button-wrapper btn-gradient rounded-full w-full sm:w-auto p-[2px]`}
+          >
+            <Button
+              buttonText="Reset"
+              buttonType="secondary"
+              customClasses={`${!nameValue || !locationValue ? "hover:cursor-not-allowed" : "hover:shadow-xl hover:cursor-pointer"} bg-white dark:bg-gradient-dark-start dark:text-white`}
+              disabled={!nameValue || !locationValue ? true : false}
               type="reset"
-              onClick={(event) => {
-                event.preventDefault();
-                setIsSubmitted(false);
-                setIsEmpty(false);
-                setSearchName(""); // clears current query
-                setSearchLocation("");
-                form.reset();
-              }}
-            >
-              Reset
-            </button>
+              callback={handleReset}
+            />
           </div>
-          <button
-            className={`${!nameValue || !locationValue ? "hover:none bg-gray-400" : "hover:cursor-pointer bg-[image:var(--bg-button)] hover:bg-[image:var(--bg-button-hover)] hover:shadow-xl"} text-white  shadow-none transition duration-300  py-2 px-6 rounded-full w-full sm:w-[180px] font-bold uppercase`}
+          <Button
+            buttonText="Scout"
+            customClasses={`${!nameValue || !locationValue ? "opacity-50 hover:shadow-none! hover:bg-[image:var(--bg-button)]! hover:cursor-not-allowed!" : "hover:cursor-pointer hover:bg-[image:var(--bg-button-hover)] hover:shadow-xl opacity-100"}`}
             disabled={!nameValue || !locationValue ? true : false}
             type="submit"
-            onClick={form.handleSubmit}
-          >
-            Scout
-          </button>
+            callback={form.handleSubmit}
+          />
         </div>
       </form>
       <section className="grid col-span-12 grid-cols-subgrid">
@@ -191,12 +200,11 @@ const SearchForm = memo(() => {
           searchResults?.fourNextPage?.length > 0 ||
           (searchResults?.places &&
             searchResults?.places.length > MAX_RESULTS * fetchMoreNum)) && (
-          <button
-            className="w-full col-span-2 col-start-6 mt-4 text-white bg-[image:var(--bg-button)] hover:bg-[image:var(--bg-button-hover)] shadow-none transition duration-300 hover:shadow-xl hover:cursor-pointer py-4 px-8 rounded-full font-bold uppercase"
-            onClick={handleMoreResults}
-          >
-            Load More
-          </button>
+          <Button
+            buttonSize="lg"
+            buttonText="Load More"
+            callback={handleMoreResults}
+          />
         )}
       </section>
     </>

@@ -5,11 +5,14 @@ export const fetchGoogleResults = async (
   name: string,
   location: string,
   initialNext: string,
-  searchResults: searchResultType | undefined,
+  existingResults: searchResultType | undefined,
 ) => {
-  const nextParam = initialNext === "initial" ? 0 : searchResults?.next.length;
+  const nextParam =
+    initialNext === "initial" ? 0 : existingResults?.googleNextPage.length;
   const googleUrl =
-    nextParam && nextParam !== 0 ? `&pagetoken=${searchResults?.next}` : "";
+    nextParam && nextParam !== 0
+      ? `&pagetoken=${existingResults?.googleNextPage}`
+      : "";
   const googleTerm = name + location;
   const googleRes = await fetch(
     `/api/googleSearch?searchTerm=${encodeURIComponent(googleTerm)}${googleUrl}`,

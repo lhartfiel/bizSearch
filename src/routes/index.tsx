@@ -107,7 +107,7 @@ function Home() {
           scrollYPos > elementRef?.current.clientHeight && (
             <button
               onClick={scrollToTop}
-              className="absolute right-4 bottom-4 flex items-center justify-center w-9 h-9 bg-bright-salmon rounded-full mr-6 hover:shadow-md hover:cursor-pointer"
+              className="absolute right-4 bottom-4 flex items-center justify-center w-9 h-9 bg-bright-salmon rounded-full mr-6 shadow-lg hover:shadow-card hover:cursor-pointer"
             >
               {iconUp}
             </button>

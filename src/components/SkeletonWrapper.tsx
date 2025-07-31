@@ -20,7 +20,7 @@ function Box({ children }: PropsWithChildren<unknown>) {
 
 const SkeletonWrapper = () => {
   return (
-    <div className="even:lg:col-start-7 odd:lg:col-start-3 lg:col-span-4 w-full rounded-lg bg-white mb-4 p-5 shadow-card">
+    <div className="col-start-1 col-span-12 even:md:col-start-7 odd:md:col-start-2 md:col-span-5 even:lg:col-start-7 odd:lg:col-start-3 lg:col-span-4 w-full rounded-lg bg-white mb-4 p-5 shadow-card">
       <SkeletonTheme duration={2} height={12}>
         <Box>
           <Skeleton
