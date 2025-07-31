@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 import { useContext } from "react";
-import { ThemeContext, ThemeDispatchContext } from "../ThemeContext";
+import { ThemeContext, ThemeDispatchContext } from "../contexts/ThemeContext";
 
 const moonIcon = <FontAwesomeIcon icon={faMoon} />;
 const sunIcon = <FontAwesomeIcon icon={faSun} />;

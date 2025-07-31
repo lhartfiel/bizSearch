@@ -19,10 +19,10 @@
   );
 
   --bg-button: linear-gradient(
-    90deg,
+    45deg,
     /* top-left to bottom-right */ var(--color-fushia) 0%,
-    var(--color-fushia) 20%,
-    var(--color-salmon) 60%
+    var(--color-fushia) 5%,
+    var(--color-salmon) 55%
   );
   --bg-button-hover: linear-gradient(
     90deg,
@@ -43,14 +43,15 @@
   --text-h1: 124px;
   --text-h1-sm: 56px;
   --text-h1-md: 84px;
-  --text-h2: 36px;
-  --text-h2-sm: 24px;
+  --text-h2-subhead: 36px;
+  --text-h2: 24px;
   --text-body: 18px;
+  --text-body-sm: 18px;
 
   --leading-h1: 136px;
   --leading-h1-mobile: 72px;
-  --leading-h2: 56px;
-  --leading-h2-sm: 32px;
+  --leading-h2-subhead: 56px;
+  --leading-h2: 28px;
 
   --leading-body: 24px;
 
@@ -61,28 +62,36 @@
   --drop-shadow-main: 1px 2px 3px rgb(0 0 0 / 0.3);
 
   --shadow-card: 2px 3px 14px rgb(0 0 0 / 0.25);
+  --shadow-card-lg: 0px 0px 12px rgb(0 0 0 / 0.35);
 }
 
-.dark .dark-gradient {
-  background-image: linear-gradient(
-    135deg,
-    /* top-left to bottom-right */ var(--color-gradient-dark-start) 0%,
-    var(--color-gradient-dark-start) 70%,
-    var(--color-gradient-dark-end) 110%
-  );
+.btn-gradient {
+  background-image: var(--bg-button);
+}
+
+.card-bg:before {
+  background-image: linear-gradient(#fff, #fff);
+  background-size: 0%;
+  background-repeat: no-repeat;
+  background-position: bottom right;
+  border-radius: 0.5rem;
+  content: "";
+  position: absolute;
+  transition: 0.3s;
+  z-index: 0;
+}
+
+.card-bg:hover:before {
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  background-image: var(--bg-linear-gradient-light);
+  background-size: 100%;
 }
 
 .light-gradient {
   background-image: var(--bg-linear-gradient-light);
-}
-
-.btn-gradient {
-  background-image: linear-gradient(
-    90deg,
-    /* top-left to bottom-right */ var(--color-fushia) 0%,
-    var(--color-fushia) 20%,
-    var(--color-salmon) 60%
-  );
 }
 
 .text-gradient {
@@ -105,6 +114,15 @@
   .dark\:placeholder-white::placeholder,
   .dark\:text-white {
     color: var(--color-white);
+  }
+
+  .dark-gradient {
+    background-image: linear-gradient(
+      135deg,
+      /* top-left to bottom-right */ var(--color-gradient-dark-start) 0%,
+      var(--color-gradient-dark-start) 70%,
+      var(--color-gradient-dark-end) 110%
+    );
   }
 }
 

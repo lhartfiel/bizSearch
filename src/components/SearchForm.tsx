@@ -1,193 +1,84 @@
-import { useState, useEffect, useTransition } from "react";
-import { useForm, formOptions, FieldInfo } from "@tanstack/react-form";
-import { QueryClient } from "@tanstack/react-query";
+import { useEffect, useState, startTransition, memo, useId } from "react";
+import { useForm } from "@tanstack/react-form";
 import { Result } from "./Result";
-import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-import { PropsWithChildren } from "react";
-import "react-loading-skeleton/dist/skeleton.css";
+import { SkeletonWrapper } from "./SkeletonWrapper";
+import { InputField } from "./InputField";
+import { initialSearchResult, MAX_RESULTS } from "../helpers/constants";
+import { fetchMainResults } from "../api/fetchMainResults";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useStore } from "@tanstack/react-form";
+import { Button } from "./Button";
 
-interface searchResultType {
-  places: any[];
-  next: string;
-  fourNextPage: string;
-}
-
-const initialSearchResult: searchResultType = {
-  places: [],
-  next: "",
-  fourNextPage: "",
-};
-
-const MAX_RESULTS = 25; // Max results per page
-
-function Box({ children }: PropsWithChildren<unknown>) {
-  return (
-    <div
-      style={{
-        borderRadius: "8px",
-        display: "flex",
-        lineHeight: 1,
-        marginBottom: "0.5rem",
-        width: "100%",
-      }}
-    >
-      {children}
-    </div>
-  );
-}
-
-const SearchForm = () => {
+const SearchForm = memo(() => {
   const [searchName, setSearchName] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
-  const [searchResults, setSearchResults] =
-    useState<searchResultType>(initialSearchResult);
   const [fetchMoreNum, setFetchMoreNum] = useState(1);
-  const [isPending, startTransition] = useTransition();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(false);
+  const uniqueId = useId();
 
-  const queryClient = new QueryClient();
-  const searchResultsNumber = searchResults.places.length;
+  const queryClient = useQueryClient();
 
-  const dedupResponses = (responses) => {
-    return responses.filter((obj, index, self) => {
-      return index === self.findIndex((t) => t.phone === obj.phone);
-    });
-  };
+  useEffect(() => {
+    queryClient.setQueryData(["search", "initial"], initialSearchResult);
+  }, [queryClient]);
 
-  const cleanedPhoneNum = (num) => {
-    return num?.replace(/[^\d+]/g, "");
-  };
+  const {
+    isLoading,
+    isFetching,
+    isError,
+    data: searchResults = { places: [], googleNextPage: "", fourNextPage: "" },
+  } = useQuery({
+    queryKey: ["search", searchName, searchLocation],
+    queryFn: () =>
+      fetchMainResults(
+        searchName,
+        searchLocation,
+        "initial",
+        undefined,
+        setIsEmpty,
+      ),
+    enabled: isSubmitted, // disable autofetching
+    staleTime: 1000 * 60 * 30, // controls background refresh every 30 minutes
+    gcTime: 1000 * 60 * 60, // keeps cache in memory for 1 hour
+  });
 
-  const fetchGoogleResults = async (name, location, initialNext) => {
-    const nextParam = initialNext === "initial" ? 0 : searchResults.next.length;
-    console.log("nextParam", nextParam, typeof nextParam);
-    const googleUrl =
-      nextParam && nextParam !== 0 ? `&pagetoken=${searchResults.next}` : "";
-    console.log("googleUrl", googleUrl);
-    const googleTerm = name + location;
-    const googleRes = await fetch(
-      `/api/googleSearch?searchTerm=${encodeURIComponent(googleTerm)}${googleUrl}`,
-    );
-
-    if (!googleRes.ok) {
-      const text = await googleRes.text();
-      console.error("Fetch failed:", text);
-      throw new Error("Failed to fetch");
+  useEffect(() => {
+    // Set isSubmitted to false once data is finished being fetched
+    if (!isFetching && isSubmitted) {
+      setIsSubmitted(false);
     }
+  }, [isFetching, isSubmitted]);
 
-    const googleJson = await googleRes.json();
-    console.log("RES", googleJson);
-    const googleNewObj = googleJson.places.map((item) => {
-      const num = cleanedPhoneNum(item?.nationalPhoneNumber);
-
-      if (!item.formattedAddress && !item?.displayName.text) {
-        // Don't return any results that don't have an address or name
-        return;
-      }
-      return {
-        address: item?.formattedAddress,
-        directions: item?.googleMapsLinks?.directionsUri,
-        name: item?.displayName.text,
-        phone: num,
-        price: item?.priceRange,
-        rating: item?.rating,
-        ratingCount: item?.userRatingCount,
-        summary: item?.generativeSummary?.overview?.text,
-        webUrl: item?.websiteUri,
-      };
-    });
-    return { googleNewObj, googleJson };
-  };
-
-  const fetchFoursquareResults = async (name, location) => {
-    console.log("NEXT", searchResults?.fourNextPage);
-    const foursquareUrl =
-      searchResults?.fourNextPage !== null
-        ? `&fourNextPage=${searchResults.fourNextPage}`
-        : "";
-    const foursquareRes = await fetch(
-      `/api/foursquareSearch?name=${encodeURIComponent(name)}&location=${location}${foursquareUrl}`,
-    );
-    const foursquareJson = await foursquareRes.json();
-    console.log("foursquareJson", foursquareJson);
-    const foursquareNewObj = foursquareJson.results.map((item) => {
-      const num = cleanedPhoneNum(item?.tel);
-
-      if (!item.location.formatted_address && !item.name) {
-        return;
-      }
-
-      return {
-        name: item?.name,
-        address: item?.location.formatted_address,
-        phone: num,
-        rating: item?.rating,
-        webUrl: item?.website,
-      };
-    });
-    setSearchResults((prev) => {
-      const placesArray = [...prev.places, ...foursquareNewObj];
-      const uniquePlaces = dedupResponses(placesArray);
-      const newArray = {
-        places: uniquePlaces || [],
-        next: "",
-        fourNextPage: foursquareJson.nextPageToken || "",
-      };
-      return newArray;
-    });
-  };
-
-  const fetchMainResults = async (name, location, nextResults) => {
-    const results = await fetchGoogleResults(name, location, nextResults);
-
-    setSearchResults((prev) => {
-      const placesArray = [...prev.places, ...results.googleNewObj];
-      const uniquePlaces = dedupResponses(placesArray);
-      const newArray = {
-        places: uniquePlaces || [],
-        next: results.googleJson.nextPageToken,
-      };
-      return newArray;
-    });
-
-    // If the results returned from the Google Response are less than the max, fetch more by calling Foursquare
-    if (results?.googleNewObj?.length < MAX_RESULTS) {
-      await fetchFoursquareResults(name, location);
+  const handleInitialSearch = async (name: string, location: string) => {
+    if (!name && !location) {
+      return;
     }
-  };
+    setIsEmpty(false);
+    setFetchMoreNum(1);
+    setSearchName(name);
+    setSearchLocation(location);
+    setIsSubmitted(true);
 
-  const fetchInitialResults = async (name, location, nextParams) => {
-    try {
-      // ALWAYS fetch the initial Google results, which only return a max of 20
-      await fetchMainResults(name, location, nextParams);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchTermResults = async (name, location) => {
-    // TODO: Extract all API calls to separate file
-    try {
-      if (searchResults.next) {
-        // If there is a next page token, fetch the next page of results from Google
-        console.log("fetch goog");
-        await fetchMainResults(name, location, searchResults.next);
-      } else {
-        console.log("fetch foursq");
-        await fetchFoursquareResults(name, location);
-      }
-    } catch (err) {
-      console.error(err);
-    }
+    // Store last search for index.tsx scroll logic
+    queryClient.setQueryData(["lastSearch"], { name, location });
   };
 
   const handleMoreResults = async () => {
     setFetchMoreNum((prev) => prev + 1);
-    if (searchResults.next.length || searchResults.fourNextPage.length) {
-      await fetchTermResults(searchName, searchLocation);
-    }
-  };
 
-  console.log("searchResults", searchResults);
+    await queryClient.fetchQuery({
+      queryKey: ["search", searchName, searchLocation],
+      queryFn: () =>
+        fetchMainResults(
+          searchName,
+          searchLocation,
+          searchResults?.googleNextPage,
+          searchResults,
+          setIsEmpty,
+        ),
+    });
+  };
 
   const form = useForm({
     defaultValues: {
@@ -195,28 +86,48 @@ const SearchForm = () => {
       location: "",
     },
     onSubmit: async ({ value }) => {
-      setSearchResults(initialSearchResult);
-
-      try {
-        setSearchName(value.name);
-        setSearchLocation(value.location);
-        console.log("name", value.name);
-        console.log("loc", value.location);
-        startTransition(async () => {
-          const data = await queryClient.fetchQuery({
-            queryKey: ["search", value.name + value.location],
-            queryFn: () =>
-              fetchInitialResults(value.name, value.location, "initial"),
-          });
-        });
-      } catch (e) {
-        console.error(e);
-      }
+      startTransition(async () => {
+        await handleInitialSearch(value.name, value.location);
+      });
     },
   });
 
-  console.log("search RES", searchResults, searchResults?.places?.length);
-  console.log("pending", isPending);
+  const inputs = [
+    {
+      name: "name",
+      label: "Name (Coffee, Dunkin Donuts)",
+      placeholder: "Enter Name",
+    },
+    {
+      name: "location",
+      label: "Location (Chicago)",
+      placeholder: "Enter Location",
+    },
+  ];
+
+  const nameValue = useStore(form.store, (state) => state.values.name);
+  const locationValue = useStore(form.store, (state) => state.values.location);
+
+  useEffect(() => {
+    // Clear the results when the user manually deletes the text in the input fields
+    if (!nameValue || !locationValue) {
+      setIsSubmitted(false);
+      setSearchName("");
+      setSearchLocation("");
+    }
+  }, [nameValue, locationValue]);
+
+  interface ResetEvent
+    extends React.SyntheticEvent<HTMLButtonElement | HTMLFormElement> {}
+
+  const handleReset = (event: ResetEvent): void => {
+    event.preventDefault();
+    setIsSubmitted(false);
+    setIsEmpty(false);
+    setSearchName(""); // clears current query
+    setSearchLocation("");
+    form.reset();
+  };
 
   return (
     <>
@@ -227,111 +138,77 @@ const SearchForm = () => {
           e.stopPropagation();
         }}
       >
-        <form.Field
-          name="name"
-          children={(field) => (
-            <span className="col-start-1 col-span-12 sm:col-span-6 md:col-span-4 md:col-start-3 lg:col-span-3 lg:col-start-4">
-              <label
-                className="block text-zinc-500 dark:text-white text-left text-sm uppercase tracking-wide mb-2"
-                htmlFor="name"
-              >
-                Name (Coffee, Dunkin Donuts)
-              </label>
-              <input
-                className="w-full border-1 border-gray-300 rounded-md p-2 placeholder-zinc-400 text-zinc-600 dark:placeholder-white dark:text-white"
-                placeholder="Enter Name"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-              />
-            </span>
-          )}
-        />
-        <form.Field
-          name="location"
-          children={(field) => (
-            <span className="col-start-1 col-span-12 sm:col-start-7 sm:col-span-6  md:col-span-4 lg:col-span-3 lg:col-start-7">
-              <label
-                className="block text-zinc-500 dark:text-white text-left text-sm uppercase tracking-wide mb-2"
-                htmlFor="location"
-              >
-                Location (Chicago)
-              </label>
-              <input
-                className="w-full border-1 border-gray-300 rounded-md p-2 mr-2 placeholder-zinc-400 text-zinc-600 dark:placeholder-white dark:text-white"
-                placeholder="Enter Location"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-              />
-            </span>
-          )}
-        />
+        {inputs.map((input) => {
+          return (
+            <InputField
+              name={input.name}
+              key={input.name}
+              label={input.label}
+              placeholder={input.placeholder}
+              form={form}
+            />
+          );
+        })}
         <div className="col-span-12 flex flex-wrap gap-4 justify-center w-full mt-5">
-          <div className="button-wrapper btn-gradient rounded-full w-full sm:w-auto p-[2px]">
-            <button
-              className="hover:cursor-pointer bg-white bg-red-500 dark:bg-gradient-dark-start py-2 px-6 rounded-full shadow-none transition-shadow duration-300 hover:shadow-xl w-full sm:w-[180px] dark:text-white font-bold uppercase"
-              type="reset"
-              onClick={(event) => {
-                event.preventDefault();
-                startTransition(() => {
-                  setSearchResults(initialSearchResult);
-                });
-                form.reset();
-              }}
-            >
-              Reset
-            </button>
-          </div>
-          <button
-            className="text-white bg-[image:var(--bg-button)] hover:bg-[image:var(--bg-button-hover)] shadow-none transition duration-300 hover:shadow-xl hover:cursor-pointer py-2 px-6 rounded-full w-full sm:w-[180px] font-bold uppercase"
-            type="submit"
-            onClick={form.handleSubmit}
+          <div
+            className={`${!nameValue || !locationValue ? "opacity-50" : "opacity-100"} button-wrapper btn-gradient rounded-full w-full sm:w-auto p-[2px]`}
           >
-            Scout
-          </button>
+            <Button
+              buttonText="Reset"
+              buttonType="secondary"
+              customClasses={`${!nameValue || !locationValue ? "hover:cursor-not-allowed" : "hover:shadow-xl hover:cursor-pointer"} bg-white dark:bg-gradient-dark-start dark:text-white`}
+              disabled={!nameValue || !locationValue ? true : false}
+              type="reset"
+              callback={handleReset}
+            />
+          </div>
+          <Button
+            buttonText="Scout"
+            customClasses={`${!nameValue || !locationValue ? "opacity-50 hover:shadow-none! hover:bg-[image:var(--bg-button)]! hover:cursor-not-allowed!" : "hover:cursor-pointer hover:bg-[image:var(--bg-button-hover)] hover:shadow-xl opacity-100"}`}
+            disabled={!nameValue || !locationValue ? true : false}
+            type="submit"
+            callback={form.handleSubmit}
+          />
         </div>
       </form>
       <section className="grid col-span-12 grid-cols-subgrid">
-        {isPending &&
+        {isLoading &&
           Array.from({ length: 4 }).map((_, idx) => {
-            return (
-              <div className="even:lg:col-start-7 odd:lg:col-start-3 lg:col-span-4 w-full rounded-lg bg-white mb-4 p-5 shadow-card">
-                <SkeletonTheme duration={2} height={12}>
-                  <Box>
-                    <Skeleton
-                      height={10}
-                      baseColor="#d1d5db"
-                      highlightColor="#9ca3af"
-                      containerClassName="flex-1"
-                      count={4}
-                      className="flex mb-2"
-                    />
-                  </Box>
-                </SkeletonTheme>
-              </div>
-            );
+            return <SkeletonWrapper key={`${uniqueId}-${idx}`} />;
           })}
-        {!isPending &&
+        {!isLoading &&
           searchResults?.places?.length > 0 &&
-          searchResults?.places.map((result, idx) => {
+          searchResults?.places?.map((result, idx: number) => {
             if (idx + 1 <= MAX_RESULTS * fetchMoreNum) {
-              return <Result result={result} key={result?.phone} index={idx} />;
+              return (
+                <Result
+                  result={result}
+                  key={`${result?.phone}-${uniqueId}`}
+                  index={idx}
+                />
+              );
             }
           })}
-        {(searchResults.next?.length > 0 ||
-          searchResults.fourNextPage?.length > 0 ||
-          searchResults.places.length > MAX_RESULTS * fetchMoreNum) && (
-          <button
-            className="w-full col-span-2 col-start-6 mt-4 text-white bg-[image:var(--bg-button)] hover:bg-[image:var(--bg-button-hover)] shadow-none transition duration-300 hover:shadow-xl hover:cursor-pointer py-4 px-8 rounded-full font-bold uppercase"
-            onClick={handleMoreResults}
-          >
-            Load More
-          </button>
+        {!isLoading && isEmpty && searchResults?.places?.length === 0 && (
+          <h2 className="text-h2 block col-span-8 col-start-3 md:col-span-4 md:col-start-5 text-center text-bright-salmon">
+            Oops! Looks like we couldn't find any search results. Please try
+            again.
+          </h2>
+        )}
+        {isError && <p>An error has been returned.</p>}
+        {(searchResults?.googleNextPage?.length > 0 ||
+          searchResults?.fourNextPage?.length > 0 ||
+          (searchResults?.places &&
+            searchResults?.places.length > MAX_RESULTS * fetchMoreNum)) && (
+          <Button
+            buttonSize="lg"
+            buttonText="Load More"
+            callback={handleMoreResults}
+          />
         )}
       </section>
     </>
   );
-};
+});
 
 export { SearchForm };

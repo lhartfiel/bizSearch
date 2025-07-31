@@ -7,19 +7,18 @@ export const ServerRoute = createServerFileRoute(
   "/api/foursquareSearch",
 ).methods({
   GET: async ({ request }) => {
-    console.log("api", FOURSQUARE_API_KEY);
     const url = new URL(request.url);
     const searchName = url.searchParams.get("name");
     const searchLocation = url.searchParams.get("location");
     const searchNextPage = url.searchParams.get("fourNextPage");
-    const apiUrl = `https://places-api.foursquare.com/places/search?query=${searchName}&near=${searchLocation}&limit=${LIMIT}&cursor=${searchNextPage}`;
+    const apiUrl = `https://places-api.foursquare.com/places/search?query=${searchName}&near=${searchLocation}&sort=RELEVANCE&limit=${LIMIT}&cursor=${searchNextPage}`;
 
     const response = await fetch(apiUrl, {
       method: "GET",
       headers: {
         accept: "application/json",
         "X-Places-Api-Version": "2025-06-17",
-        authorization: `Bearer ${process.env.FOURSQUARE_API_KEY}`,
+        authorization: `Bearer ${FOURSQUARE_API_KEY}`,
       },
     });
 

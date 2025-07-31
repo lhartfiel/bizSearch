@@ -58,7 +58,7 @@ export const ServerRoute = createServerFileRoute("/api/googleSearch").methods({
         places: [...data.places, ...newData.places],
         nextPageToken: newData.nextPageToken || null,
       };
-
+      console.log("COM", comboData);
       return new Response(JSON.stringify(comboData), {
         status: 200,
         headers: { "Content-Type": "application/json" },

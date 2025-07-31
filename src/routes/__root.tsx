@@ -10,8 +10,14 @@ import {
 } from "@tanstack/react-router";
 import { NotFound } from "../components/NotFound";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeContext, ThemeDispatchContext } from "../ThemeContext";
+import { ThemeContext, ThemeDispatchContext } from "../contexts/ThemeContext";
 import { useReducer } from "react";
+import {
+  SearchResultContext,
+  SearchResultDispatchContext,
+} from "../contexts/SearchResultContext";
+import { resultsReducer } from "../contexts/SearchResultContext";
+import { initialSearchResult } from "../helpers/constants";
 
 const queryClient = new QueryClient();
 
@@ -48,10 +54,15 @@ function themeReducer(theme, action) {
 }
 
 function RootComponent() {
+  const [results, dispatch] = useReducer(resultsReducer, initialSearchResult);
   return (
     <RootDocument>
       <QueryClientProvider client={queryClient}>
-        <Outlet />
+        <SearchResultContext.Provider value={results}>
+          <SearchResultDispatchContext.Provider value={dispatch}>
+            <Outlet />
+          </SearchResultDispatchContext.Provider>
+        </SearchResultContext.Provider>
       </QueryClientProvider>
     </RootDocument>
   );
