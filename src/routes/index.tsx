@@ -6,6 +6,7 @@ import { SearchResultContext } from "../contexts/SearchResultContext";
 import { useRef, useEffect, useState, useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleUp } from "@fortawesome/free-solid-svg-icons";
+import { useQueryClient } from "@tanstack/react-query";
 
 const iconUp = <FontAwesomeIcon className="text-white" icon={faAngleUp} />;
 
@@ -37,10 +38,22 @@ function useElementScrollPosition(ref: React.RefObject<HTMLDivElement | null>) {
 }
 
 function Home() {
-  const searchResults = useContext(SearchResultContext);
+  // const searchResults = useContext(SearchResultContext);
   const elementRef = useRef<HTMLDivElement>(null);
   const [hasScrollbar, setHasScrollbar] = useState(false);
   const scrollYPos = useElementScrollPosition(elementRef);
+  const queryClient = useQueryClient();
+
+  const lastSearch = queryClient.getQueryData<{
+    name: string;
+    location: string;
+  }>(["lastSearch"]);
+  const searchResults = lastSearch
+    ? queryClient.getQueryData([
+        "search",
+        lastSearch.name + lastSearch.location,
+      ])
+    : null;
 
   useEffect(() => {
     const checkScrollbar = () => {

@@ -1,5 +1,5 @@
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useId } from "react";
 import "react-loading-skeleton/dist/skeleton.css";
 
 function Box({ children }: PropsWithChildren<unknown>) {

@@ -1,6 +1,6 @@
 export interface searchResultType {
   places: any[];
-  next: string;
+  googleNextPage: string;
   fourNextPage: string;
 }
 
@@ -37,6 +37,6 @@ export interface foursquarePlaceType {
 export const MAX_RESULTS = 25; // Max results per page
 export const initialSearchResult: searchResultType = {
   places: [],
-  next: "",
+  googleNextPage: "",
   fourNextPage: "",
 };

@@ -1,77 +1,81 @@
-import { useState, useTransition } from "react";
+import { useEffect, useState, startTransition, memo, useId } from "react";
 import { useForm } from "@tanstack/react-form";
-import { QueryClient } from "@tanstack/react-query";
 import { Result } from "./Result";
 import { SkeletonWrapper } from "./SkeletonWrapper";
 import { InputField } from "./InputField";
-import { MAX_RESULTS } from "../helpers/constants";
+import { initialSearchResult, MAX_RESULTS } from "../helpers/constants";
 import { fetchMainResults } from "../api/fetchMainResults";
-import { fetchFoursquareResults } from "../api/fetchFoursquareResults";
-import { useContext } from "react";
-import {
-  SearchResultContext,
-  SearchResultDispatchContext,
-} from "../contexts/SearchResultContext";
-import { initialSearchResult } from "../helpers/constants";
-import { memo } from "react";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
+import { useStore } from "@tanstack/react-form";
 
 const SearchForm = memo(() => {
   const [searchName, setSearchName] = useState("");
   const [searchLocation, setSearchLocation] = useState("");
   const [fetchMoreNum, setFetchMoreNum] = useState(1);
-  const [isPending, startTransition] = useTransition();
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
+  const uniqueId = useId();
 
-  const searchResults = useContext(SearchResultContext);
-  const dispatch = useContext(SearchResultDispatchContext);
+  const queryClient = useQueryClient();
 
-  const queryClient = new QueryClient();
+  useEffect(() => {
+    queryClient.setQueryData(["search", "initial"], initialSearchResult);
+  }, [queryClient]);
 
-  const fetchInitialResults = async (
-    name: string,
-    location: string,
-    nextParams: string,
-  ) => {
-    try {
-      // ALWAYS fetch the initial Google results, which only return a max of 20
-      await fetchMainResults(
-        name,
-        location,
-        nextParams,
-        dispatch,
-        searchResults,
+  const {
+    isLoading,
+    isFetching,
+    isError,
+    data: searchResults = { places: [], googleNextPage: "", fourNextPage: "" },
+  } = useQuery({
+    queryKey: ["search", searchName, searchLocation],
+    queryFn: () =>
+      fetchMainResults(
+        searchName,
+        searchLocation,
+        "initial",
+        undefined,
         setIsEmpty,
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
+      ),
+    enabled: isSubmitted, // disable autofetching
+    staleTime: 1000 * 60 * 30, // controls background refresh every 30 minutes
+    gcTime: 1000 * 60 * 60, // keeps cache in memory for 1 hour
+  });
 
-  const fetchTermResults = async (name: string, location: string) => {
-    try {
-      if (searchResults.next) {
-        // If there is a next page token, fetch the next page of results from Google
-        await fetchMainResults(
-          name,
-          location,
-          searchResults.next,
-          dispatch,
-          searchResults,
-        );
-      } else {
-        await fetchFoursquareResults(name, location, dispatch, searchResults);
-      }
-    } catch (err) {
-      console.error(err);
+  useEffect(() => {
+    if (!isFetching && isSubmitted) {
+      setIsSubmitted(false);
     }
+  }, [isFetching, isSubmitted]);
+
+  const handleInitialSearch = async (name: string, location: string) => {
+    if (!name && !location) {
+      return;
+    }
+    setIsEmpty(false);
+    setFetchMoreNum(1);
+    setSearchName(name);
+    setSearchLocation(location);
+    setIsSubmitted(true);
+
+    // Store last search for index.tsx scroll logic
+    queryClient.setQueryData(["lastSearch"], { name, location });
   };
 
   const handleMoreResults = async () => {
     setFetchMoreNum((prev) => prev + 1);
-    if (searchResults.next.length || searchResults.fourNextPage.length) {
-      await fetchTermResults(searchName, searchLocation);
-    }
+
+    await queryClient.fetchQuery({
+      queryKey: ["search", searchName, searchLocation],
+      queryFn: () =>
+        fetchMainResults(
+          searchName,
+          searchLocation,
+          searchResults?.googleNextPage,
+          searchResults,
+          setIsEmpty,
+        ),
+    });
   };
 
   const form = useForm({
@@ -80,24 +84,9 @@ const SearchForm = memo(() => {
       location: "",
     },
     onSubmit: async ({ value }) => {
-      setIsEmpty(false);
-      setHasSearched(true);
-      dispatch({
-        type: "clear",
+      startTransition(async () => {
+        await handleInitialSearch(value.name, value.location);
       });
-      try {
-        setSearchName(value.name);
-        setSearchLocation(value.location);
-        startTransition(async () => {
-          await queryClient.fetchQuery({
-            queryKey: ["search", value.name + value.location],
-            queryFn: () =>
-              fetchInitialResults(value.name, value.location, "initial"),
-          });
-        });
-      } catch (e) {
-        console.error(e);
-      }
     },
   });
 
@@ -114,9 +103,17 @@ const SearchForm = memo(() => {
     },
   ];
 
-  console.log("search RES", searchResults, searchResults?.places?.length);
-  console.log("pending", isPending);
-  console.log("empty", isEmpty);
+  const nameValue = useStore(form.store, (state) => state.values.name);
+  const locationValue = useStore(form.store, (state) => state.values.location);
+
+  useEffect(() => {
+    // Clear the results when the user manually deletes the text in the input fields
+    if (!nameValue || !locationValue) {
+      setIsSubmitted(false);
+      setSearchName("");
+      setSearchLocation("");
+    }
+  }, [nameValue, locationValue]);
 
   return (
     <>
@@ -145,16 +142,10 @@ const SearchForm = memo(() => {
               type="reset"
               onClick={(event) => {
                 event.preventDefault();
+                setIsSubmitted(false);
                 setIsEmpty(false);
-                setHasSearched(false);
-                startTransition(() => {
-                  dispatch({
-                    type: "clear",
-                    places: initialSearchResult.places,
-                    next: initialSearchResult.next,
-                    fourNextPage: initialSearchResult.fourNextPage,
-                  });
-                });
+                setSearchName(""); // clears current query
+                setSearchLocation("");
                 form.reset();
               }}
             >
@@ -162,7 +153,8 @@ const SearchForm = memo(() => {
             </button>
           </div>
           <button
-            className="text-white bg-[image:var(--bg-button)] hover:bg-[image:var(--bg-button-hover)] shadow-none transition duration-300 hover:shadow-xl hover:cursor-pointer py-2 px-6 rounded-full w-full sm:w-[180px] font-bold uppercase"
+            className={`${!nameValue || !locationValue ? "hover:none bg-gray-400" : "hover:cursor-pointer bg-[image:var(--bg-button)] hover:bg-[image:var(--bg-button-hover)] hover:shadow-xl"} text-white  shadow-none transition duration-300  py-2 px-6 rounded-full w-full sm:w-[180px] font-bold uppercase`}
+            disabled={!nameValue || !locationValue ? true : false}
             type="submit"
             onClick={form.handleSubmit}
           >
@@ -171,24 +163,31 @@ const SearchForm = memo(() => {
         </div>
       </form>
       <section className="grid col-span-12 grid-cols-subgrid">
-        {isPending &&
+        {isLoading &&
           Array.from({ length: 4 }).map((_, idx) => {
-            return <SkeletonWrapper />;
+            return <SkeletonWrapper key={`${uniqueId}-${idx}`} />;
           })}
-        {!isPending &&
+        {!isLoading &&
           searchResults?.places?.length > 0 &&
-          searchResults?.places.map((result, idx: number) => {
+          searchResults?.places?.map((result, idx: number) => {
             if (idx + 1 <= MAX_RESULTS * fetchMoreNum) {
-              return <Result result={result} key={result?.phone} index={idx} />;
+              return (
+                <Result
+                  result={result}
+                  key={`${result?.phone}-${uniqueId}`}
+                  index={idx}
+                />
+              );
             }
           })}
-        {!isPending && hasSearched && searchResults.places.length === 0 && (
+        {!isLoading && isEmpty && searchResults?.places?.length === 0 && (
           <h2 className="text-h2 block col-span-8 col-start-3 md:col-span-4 md:col-start-5 text-center text-bright-salmon">
             Oops! Looks like we couldn't find any search results. Please try
             again.
           </h2>
         )}
-        {(searchResults?.next?.length > 0 ||
+        {isError && <p>An error has been returned.</p>}
+        {(searchResults?.googleNextPage?.length > 0 ||
           searchResults?.fourNextPage?.length > 0 ||
           (searchResults?.places &&
             searchResults?.places.length > MAX_RESULTS * fetchMoreNum)) && (

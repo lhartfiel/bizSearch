@@ -17,6 +17,7 @@ import {
   SearchResultDispatchContext,
 } from "../contexts/SearchResultContext";
 import { resultsReducer } from "../contexts/SearchResultContext";
+import { initialSearchResult } from "../helpers/constants";
 
 const queryClient = new QueryClient();
 
@@ -53,7 +54,7 @@ function themeReducer(theme, action) {
 }
 
 function RootComponent() {
-  const [results, dispatch] = useReducer(resultsReducer, {});
+  const [results, dispatch] = useReducer(resultsReducer, initialSearchResult);
   return (
     <RootDocument>
       <QueryClientProvider client={queryClient}>

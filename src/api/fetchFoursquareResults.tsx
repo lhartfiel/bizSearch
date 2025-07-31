@@ -1,12 +1,10 @@
 import { cleanedPhoneNum } from "../helpers/helperFns";
-import { Dispatch } from "react";
 import { searchResultType } from "../helpers/constants";
 import { foursquarePlaceType } from "../helpers/constants";
 
 export const fetchFoursquareResults = async (
   name: string,
   location: string,
-  dispatch: Dispatch<any>,
   searchResults?: searchResultType,
 ) => {
   const foursquareUrl = searchResults?.fourNextPage.length
@@ -35,13 +33,8 @@ export const fetchFoursquareResults = async (
     },
   );
 
-  if (dispatch)
-    dispatch({
-      type: "update result",
-      places: foursquareNewObj,
-      next: "",
-      fourNextPage: foursquareJson?.nextPageToken || "",
-    });
-
-  return foursquareNewObj;
+  return {
+    places: foursquareNewObj,
+    fourNextPage: foursquareJson.nextPageToken || "",
+  };
 };

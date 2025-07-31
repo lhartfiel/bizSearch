@@ -16,8 +16,8 @@ const InfoBox = ({
       {showPopup && (
         <div className="absolute bottom-[26px] right-0 popup bg-bright-salmon rounded-sm p-3 w-[180px] shadow-lg">
           <p className="leading-5 text-[16px] text-white">
-            This is a rating of <span className="font-black">{rating}</span> out
-            of 5 based on a total number of {ratingCount} ratings.
+            Rated <span className="font-black">{rating}</span> out of 5 based on
+            a total of {ratingCount} ratings.
           </p>
         </div>
       )}

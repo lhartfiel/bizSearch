@@ -5,11 +5,11 @@ export const fetchGoogleResults = async (
   name: string,
   location: string,
   initialNext: string,
-  searchResults: searchResultType,
+  searchResults: searchResultType | undefined,
 ) => {
-  const nextParam = initialNext === "initial" ? 0 : searchResults.next.length;
+  const nextParam = initialNext === "initial" ? 0 : searchResults?.next.length;
   const googleUrl =
-    nextParam && nextParam !== 0 ? `&pagetoken=${searchResults.next}` : "";
+    nextParam && nextParam !== 0 ? `&pagetoken=${searchResults?.next}` : "";
   const googleTerm = name + location;
   const googleRes = await fetch(
     `/api/googleSearch?searchTerm=${encodeURIComponent(googleTerm)}${googleUrl}`,
@@ -22,6 +22,7 @@ export const fetchGoogleResults = async (
   }
 
   const googleJson = await googleRes.json();
+  const nextPage = googleJson.nextPageToken;
   const googleNewObj = googleJson?.places.map((item: googlePlaceType) => {
     const num = cleanedPhoneNum(item?.nationalPhoneNumber);
 
@@ -42,5 +43,5 @@ export const fetchGoogleResults = async (
       webUrl: item?.websiteUri,
     };
   });
-  return { googleNewObj, googleJson };
+  return { places: googleNewObj, nextPage };
 };
