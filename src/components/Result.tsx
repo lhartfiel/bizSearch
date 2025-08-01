@@ -6,7 +6,7 @@ import {
   faPhone,
 } from "@fortawesome/free-solid-svg-icons";
 import { Ratings } from "./Ratings";
-import { InfoBox } from "./Infobox";
+import { InfoBox } from "./InfoBox";
 
 const webIcon = (
   <FontAwesomeIcon icon={faGlobe} className="text-h2 text-bright-salmon" />
