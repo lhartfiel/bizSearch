@@ -14,6 +14,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { ServerRoute as ApiGoogleSearchServerRouteImport } from './routes/api/googleSearch'
 import { ServerRoute as ApiFoursquareSearchServerRouteImport } from './routes/api/foursquareSearch'
+import { ServerRoute as ApiDebugServerRouteImport } from './routes/api/debug'
 
 const rootServerRouteImport = createServerRootRoute()
 
@@ -33,6 +34,11 @@ const ApiFoursquareSearchServerRoute =
     path: '/api/foursquareSearch',
     getParentRoute: () => rootServerRouteImport,
   } as any)
+const ApiDebugServerRoute = ApiDebugServerRouteImport.update({
+  id: '/api/debug',
+  path: '/api/debug',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -56,27 +62,31 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
 }
 export interface FileServerRoutesByFullPath {
+  '/api/debug': typeof ApiDebugServerRoute
   '/api/foursquareSearch': typeof ApiFoursquareSearchServerRoute
   '/api/googleSearch': typeof ApiGoogleSearchServerRoute
 }
 export interface FileServerRoutesByTo {
+  '/api/debug': typeof ApiDebugServerRoute
   '/api/foursquareSearch': typeof ApiFoursquareSearchServerRoute
   '/api/googleSearch': typeof ApiGoogleSearchServerRoute
 }
 export interface FileServerRoutesById {
   __root__: typeof rootServerRouteImport
+  '/api/debug': typeof ApiDebugServerRoute
   '/api/foursquareSearch': typeof ApiFoursquareSearchServerRoute
   '/api/googleSearch': typeof ApiGoogleSearchServerRoute
 }
 export interface FileServerRouteTypes {
   fileServerRoutesByFullPath: FileServerRoutesByFullPath
-  fullPaths: '/api/foursquareSearch' | '/api/googleSearch'
+  fullPaths: '/api/debug' | '/api/foursquareSearch' | '/api/googleSearch'
   fileServerRoutesByTo: FileServerRoutesByTo
-  to: '/api/foursquareSearch' | '/api/googleSearch'
-  id: '__root__' | '/api/foursquareSearch' | '/api/googleSearch'
+  to: '/api/debug' | '/api/foursquareSearch' | '/api/googleSearch'
+  id: '__root__' | '/api/debug' | '/api/foursquareSearch' | '/api/googleSearch'
   fileServerRoutesById: FileServerRoutesById
 }
 export interface RootServerRouteChildren {
+  ApiDebugServerRoute: typeof ApiDebugServerRoute
   ApiFoursquareSearchServerRoute: typeof ApiFoursquareSearchServerRoute
   ApiGoogleSearchServerRoute: typeof ApiGoogleSearchServerRoute
 }
@@ -108,6 +118,13 @@ declare module '@tanstack/react-start/server' {
       preLoaderRoute: typeof ApiFoursquareSearchServerRouteImport
       parentRoute: typeof rootServerRouteImport
     }
+    '/api/debug': {
+      id: '/api/debug'
+      path: '/api/debug'
+      fullPath: '/api/debug'
+      preLoaderRoute: typeof ApiDebugServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
   }
 }
 
@@ -118,6 +135,7 @@ export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
 const rootServerRouteChildren: RootServerRouteChildren = {
+  ApiDebugServerRoute: ApiDebugServerRoute,
   ApiFoursquareSearchServerRoute: ApiFoursquareSearchServerRoute,
   ApiGoogleSearchServerRoute: ApiGoogleSearchServerRoute,
 }
