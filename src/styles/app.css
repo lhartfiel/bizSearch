@@ -127,8 +127,8 @@
 }
 
 .popup:after {
-  border-left: 10px solid transparent; /* Adjust size as needed */
-  border-right: 10px solid transparent; /* Adjust size as needed */
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
   border-top: 8px solid var(--color-bright-salmon);
   bottom: -6px;
   content: "";
