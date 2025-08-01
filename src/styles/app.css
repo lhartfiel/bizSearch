@@ -126,6 +126,16 @@
   }
 }
 
+.popup:after {
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 8px solid var(--color-bright-salmon);
+  bottom: -6px;
+  content: "";
+  position: absolute;
+  right: 16px;
+}
+
 @media (hover: hover) {
   .hover-bg-button-hover:hover {
     background-image: var(--bg-button-hover);

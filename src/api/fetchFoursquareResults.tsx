@@ -5,10 +5,10 @@ import { foursquarePlaceType } from "../helpers/constants";
 export const fetchFoursquareResults = async (
   name: string,
   location: string,
-  searchResults?: searchResultType,
+  existingResults?: searchResultType,
 ) => {
-  const foursquareUrl = searchResults?.fourNextPage.length
-    ? `&fourNextPage=${searchResults.fourNextPage}`
+  const foursquareUrl = existingResults?.fourNextPage.length
+    ? `&fourNextPage=${existingResults.fourNextPage}`
     : "";
   const foursquareRes = await fetch(
     `/api/foursquareSearch?name=${encodeURIComponent(name)}&location=${location}${foursquareUrl}`,
