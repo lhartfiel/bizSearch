@@ -5,23 +5,18 @@ export interface searchResultType {
 }
 
 export interface googlePlaceType {
-  formattedAddress: string;
+  formatted_address: string;
   googleMapsLinks: {
     directionsUri: string;
   };
-  displayName: {
+  name: {
     text: string;
   };
-  nationalPhoneNumber: string;
+  phone: string;
   priceRange: string;
   rating: number | string;
-  userRatingCount: number;
-  generativeSummary: {
-    overview: {
-      text: string;
-    };
-  };
-  websiteUri: string;
+  user_ratings_total: number;
+  webUrl: string;
 }
 
 export interface foursquarePlaceType {

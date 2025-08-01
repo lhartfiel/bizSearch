@@ -21,12 +21,17 @@ const locationIcon = (
 );
 
 const Result = ({ result, index }) => {
+  const isTouchDevice = () => {
+    return "ontouchstart" in document.documentElement;
+  };
   const Wrapper = result?.webUrl ? "a" : "div";
-  const wrapperProps = result?.webUrl ? { href: result.webUrl } : {};
+  const wrapperProps =
+    result?.webUrl && !isTouchDevice() ? { href: result.webUrl } : {};
 
   const phoneNumber =
     result?.phone !== undefined ? parsePhoneNumber(result?.phone, "US") : "";
   const formattedPhone = phoneNumber ? phoneNumber.formatNational() : "N/A";
+
   return (
     <Wrapper
       {...wrapperProps}
@@ -39,7 +44,15 @@ const Result = ({ result, index }) => {
           <h2 className="text-gradient text-h2 leading-h2 font-black mb-4">
             {result?.name}
           </h2>
-          <span className="ml-2">{result?.webUrl && webIcon}</span>
+          <span className="ml-2">
+            {isTouchDevice() && result.webUrl ? (
+              <button onClick={() => window.open(result.webUrl, "_blank")}>
+                {webIcon}
+              </button>
+            ) : (
+              webIcon
+            )}
+          </span>
         </span>
         {result?.address && (
           <p className="text-body leading-body mb-2">

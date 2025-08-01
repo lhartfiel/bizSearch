@@ -26,25 +26,37 @@ export const fetchGoogleResults = async (
 
   const googleJson = await googleRes.json();
   const nextPage = googleJson.nextPageToken;
+  console.log("GOOG", googleJson);
   const googleNewObj = googleJson?.places.map((item: googlePlaceType) => {
-    const num = cleanedPhoneNum(item?.nationalPhoneNumber);
+    const num = cleanedPhoneNum(item?.phone);
+    // const num = cleanedPhoneNum(item?.nationalPhoneNumber);
 
-    if (!item.formattedAddress && !item?.displayName.text) {
+    if (!item.formatted_address && !item?.name) {
       // Don't return any results if there isn't an address or name
       return;
     }
-
     return {
-      address: item?.formattedAddress,
-      directions: item?.googleMapsLinks?.directionsUri,
-      name: item?.displayName.text,
+      address: item?.formatted_address,
+      name: item?.name,
       phone: num,
       price: item?.priceRange,
       rating: item?.rating,
-      ratingCount: item?.userRatingCount,
-      summary: item?.generativeSummary?.overview?.text,
-      webUrl: item?.websiteUri,
+      ratingCount: item?.user_ratings_total,
+      // summary: item?.generativeSummary?.overview?.text,
+      webUrl: item?.webUrl,
     };
+
+    // return {
+    //   address: item?.formattedAddress,
+    //   directions: item?.googleMapsLinks?.directionsUri,
+    //   name: item?.displayName.text,
+    //   phone: num,
+    //   price: item?.priceRange,
+    //   rating: item?.rating,
+    //   ratingCount: item?.userRatingCount,
+    //   summary: item?.generativeSummary?.overview?.text,
+    //   webUrl: item?.websiteUri,
+    // };
   });
   return { places: googleNewObj, nextPage };
 };

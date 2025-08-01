@@ -22,6 +22,7 @@ const InfoBox = ({
         </div>
       )}
       <div
+        onClick={() => setShowPopup((prev) => !prev)}
         onMouseEnter={() => setShowPopup(true)}
         onMouseLeave={() => setShowPopup(false)}
       >
