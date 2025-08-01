@@ -2,67 +2,64 @@ import { createServerFileRoute } from "@tanstack/react-start/server";
 
 const API_KEY = process.env.GOOGLE_API_KEY;
 
-type BodyType = {
-  textQuery: string;
-  pageToken?: string | null;
-};
-
 export const ServerRoute = createServerFileRoute("/api/googleSearch").methods({
   GET: async ({ request }) => {
     const url = new URL(request.url);
     const searchTerm = url.searchParams.get("searchTerm");
     const pageToken = url.searchParams.get("pagetoken");
-
     if (!searchTerm || searchTerm.trim() === "") {
       return { places: [] }; // Return empty results if no search term
     }
 
-    const body = pageToken
-      ? { textQuery: searchTerm, pageToken: pageToken }
-      : { textQuery: searchTerm };
-    const fetchUrl = "https://places.googleapis.com/v1/places:searchText";
-    const callFetch = async (body: BodyType) => {
-      return await fetch(fetchUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": process.env.GOOGLE_API_KEY!,
-          "X-Goog-FieldMask":
-            "places.displayName,places.googleMapsLinks,places.generativeSummary,places.delivery,places.outdoorSeating,places.primaryType,places.priceRange,places.userRatingCount,places.formattedAddress,places.nationalPhoneNumber,nextPageToken,places.priceLevel,places.id,places.priceRange,places.rating,places.websiteUri",
-        },
-        body: JSON.stringify(body),
-      });
-    };
+    const params = new URLSearchParams({
+      query: searchTerm,
+      key: API_KEY!,
+    });
+    if (pageToken) params.append("pagetoken", pageToken);
 
-    const response = await callFetch(body);
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error("Google API error details:", errorBody);
-      throw new Error(`Google API returned ${response.status}: ${errorBody}`);
+    const searchResponse = await fetch(
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?${params}`,
+    );
+    if (!searchResponse?.ok) {
+      throw new Error(`HTTP error! status: ${searchResponse?.status}`);
     }
 
-    let data = await response.json();
-    const nextPageToken = data.nextPageToken || null;
-    if (!nextPageToken) {
-      return new Response(JSON.stringify(data), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
-    } else {
-      // If there is a nextPageToken, fetch the next page of results
-      const body = { textQuery: searchTerm, pageToken: nextPageToken };
-      const newResponse = await callFetch(body);
-      const newData = await newResponse.json();
+    const searchData = await searchResponse.json();
+    const results = searchData.results || [];
 
-      const comboData = {
-        places: [...data.places, ...newData.places],
-        nextPageToken: newData.nextPageToken || null,
-      };
-      console.log("COM", comboData);
-      return new Response(JSON.stringify(comboData), {
+    const placesWithDetails = await Promise.all(
+      results.map(async (item: any) => {
+        try {
+          const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${item.place_id}&fields=formatted_phone_number,website&key=${API_KEY}`;
+          const detailResponse = await fetch(detailUrl);
+
+          if (!detailResponse.ok) {
+            throw new Error(`HTTP error! status: ${detailResponse.status}`);
+          }
+
+          const detailData = await detailResponse.json();
+
+          return {
+            ...item,
+            phone: detailData.result?.formatted_phone_number || null,
+            webUrl: detailData.result?.website || null,
+          };
+        } catch (err) {
+          console.error(`Failed fetching details for ${item.place_id}`, err);
+          return { ...item, phone: null, webUrl: null };
+        }
+      }),
+    );
+
+    return new Response(
+      JSON.stringify({
+        places: placesWithDetails,
+        nextPageToken: searchData.next_page_token || null,
+      }),
+      {
         status: 200,
         headers: { "Content-Type": "application/json" },
-      });
-    }
+      },
+    );
   },
 });
