@@ -19,10 +19,10 @@ export const ServerRoute = createServerFileRoute("/api/googleSearch").methods({
 
     // Use the legacy Places API which allows 10k free calls per day
     const searchResponse = await fetch(
-      `https://maps.googleapis.com/maps/api/place/textsearch/json?${params}`,
+      `https://maps.googleapis.com/maps/api/place/textsearc/json?${params}`,
     );
     if (!searchResponse?.ok) {
-      throw new Error(`HTTP error! status: ${searchResponse?.status}`);
+      throw new Error(`Error: ${searchResponse?.status}`);
     }
 
     const searchData = await searchResponse.json();

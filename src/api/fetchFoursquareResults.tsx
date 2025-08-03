@@ -14,6 +14,7 @@ export const fetchFoursquareResults = async (
     `/api/foursquareSearch?name=${encodeURIComponent(name)}&location=${location}${foursquareUrl}`,
   );
   const foursquareJson = await foursquareRes.json();
+  console.log("jsonFOUR", foursquareJson);
 
   const foursquareNewObj = foursquareJson.results.map(
     (item: foursquarePlaceType) => {

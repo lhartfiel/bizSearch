@@ -8,6 +8,15 @@ import { fetchMainResults } from "../api/fetchMainResults";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useStore } from "@tanstack/react-form";
 import { Button } from "./Button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
+
+const alertIcon = (
+  <FontAwesomeIcon
+    icon={faCircleExclamation}
+    className="text-bright-salmon text-h2 mr-2"
+  />
+);
 
 const SearchForm = memo(() => {
   const [searchName, setSearchName] = useState("");
@@ -23,9 +32,12 @@ const SearchForm = memo(() => {
     queryClient.setQueryData(["search", "initial"], initialSearchResult);
   }, [queryClient]);
 
+  console.log("search name", searchName);
+
   const {
     isLoading,
     isFetching,
+    error,
     isError,
     data: searchResults = { places: [], googleNextPage: "", fourNextPage: "" },
   } = useQuery({
@@ -49,6 +61,8 @@ const SearchForm = memo(() => {
       setIsSubmitted(false);
     }
   }, [isFetching, isSubmitted]);
+
+  console.log("isError", isError);
 
   const handleInitialSearch = async (name: string, location: string) => {
     if (!name && !location) {
@@ -190,12 +204,18 @@ const SearchForm = memo(() => {
             }
           })}
         {!isLoading && isEmpty && searchResults?.places?.length === 0 && (
-          <h2 className="text-h2 block col-span-8 col-start-3 md:col-span-4 md:col-start-5 text-center text-bright-salmon">
-            Oops! Looks like we couldn't find any search results. Please try
-            again.
+          <h2 className="text-h2-sm md:text-h2 block col-span-8 col-start-3 md:col-span-4 md:col-start-5 text-center text-dark-blue">
+            Aw, shucks! We couldn't find any search results for that criteria.{" "}
+            <br />
+            <span className="block mt-3">Please search again.</span>
           </h2>
         )}
-        {isError && <p>An error has been returned.</p>}
+        {isError && (
+          <p className="flex items-center justify-center text-center col-span-12 md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3 text-dark-blue">
+            {alertIcon}
+            An error has been returned. {error.message}
+          </p>
+        )}
         {(searchResults?.googleNextPage?.length > 0 ||
           searchResults?.fourNextPage?.length > 0 ||
           (searchResults?.places &&

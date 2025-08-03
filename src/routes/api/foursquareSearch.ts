@@ -11,8 +11,7 @@ export const ServerRoute = createServerFileRoute(
     const searchName = url.searchParams.get("name");
     const searchLocation = url.searchParams.get("location");
     const searchNextPage = url.searchParams.get("fourNextPage");
-    const apiUrl = `https://places-api.foursquare.com/places/search?query=${searchName}&near=${searchLocation}&sort=RELEVANCE&limit=${LIMIT}&cursor=${searchNextPage}`;
-
+    const apiUrl = `https://places-api.foursquare.com/places/searc?query=${searchName}&near=${searchLocation}&sort=RELEVANCE&limit=${LIMIT}&cursor=${searchNextPage}`;
     const response = await fetch(apiUrl, {
       method: "GET",
       headers: {
@@ -21,6 +20,9 @@ export const ServerRoute = createServerFileRoute(
         authorization: `Bearer ${FOURSQUARE_API_KEY}`,
       },
     });
+    if (!response?.ok) {
+      throw new Error(`Error: ${response?.status}: ${response.statusText}`);
+    }
 
     const link = response?.headers?.get("link");
     const nextPageToken = link?.match(/cursor=([^&]+)/)?.[1];

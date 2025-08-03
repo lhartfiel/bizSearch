@@ -19,14 +19,12 @@ export const fetchGoogleResults = async (
   );
 
   if (!googleRes.ok) {
-    const text = await googleRes.text();
-    console.error("Fetch failed:", text);
-    throw new Error("Failed to fetch");
+    console.error("Fetch failed:", googleRes.statusText);
+    return { error: googleRes };
   }
 
   const googleJson = await googleRes.json();
   const nextPage = googleJson.nextPageToken;
-  console.log("GOOG", googleJson);
   const googleNewObj = googleJson?.places.map((item: googlePlaceType) => {
     const num = cleanedPhoneNum(item?.phone);
 

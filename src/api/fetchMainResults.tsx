@@ -19,6 +19,7 @@ export const fetchMainResults = async (
   existingResults: searchResultType | undefined,
   setIsEmpty: (value: boolean) => void,
 ) => {
+  let error = false;
   let combinedResults = existingResults?.places || [];
   let nextGoogleToken = existingResults?.googleNextPage || "";
   let fourNextPage = existingResults?.fourNextPage || "";
@@ -32,27 +33,34 @@ export const fetchMainResults = async (
       nextResults,
       existingResults,
     );
-    combinedResults = dedupResponses([
-      ...combinedResults,
-      ...(googleResponse.places || []),
-    ]);
-    nextGoogleToken = googleResponse.nextPage || "";
-    if (!googleResponse.nextPage) {
-      nextGoogleToken = "";
+    if (googleResponse.error) {
+      error = true;
+    } else {
+      combinedResults = dedupResponses([
+        ...combinedResults,
+        ...(googleResponse.places || []),
+      ]);
+      nextGoogleToken = googleResponse.nextPage || "";
+      if (!googleResponse.nextPage) {
+        nextGoogleToken = "";
+      }
     }
   }
+
+  console.log("ERROR", error);
 
   /*
   If the results returned from the Google Response
   are less than the max and does not have next page token,
   fetch more by calling Foursquare
   */
-  if (!nextGoogleToken) {
+  if (!nextGoogleToken || error) {
     const fsResults = await fetchFoursquareResults(
       name,
       location,
       existingResults,
     );
+    console.log("FOUR");
     fourSquareResults = fsResults.places || [];
     fourNextPage = fsResults.fourNextPage || "";
     combinedResults = dedupResponses([
