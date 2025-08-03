@@ -68,7 +68,11 @@ const Result = ({ result, index }) => {
       {result.rating && (
         <span className="relative flex justify-end items-end w-full mt-2">
           <Ratings rating={result.rating} />
-          <InfoBox rating={result.rating} ratingCount={result.ratingCount} />
+          <InfoBox
+            isTouch={isTouchDevice}
+            rating={result.rating}
+            ratingCount={result.ratingCount}
+          />
         </span>
       )}
     </Wrapper>

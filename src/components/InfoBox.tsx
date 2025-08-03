@@ -3,9 +3,11 @@ import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 
 const InfoBox = ({
+  isTouch,
   rating,
   ratingCount,
 }: {
+  isTouch: boolean;
   rating: number;
   ratingCount: number;
 }) => {
@@ -23,8 +25,8 @@ const InfoBox = ({
       )}
       <div
         onClick={() => setShowPopup((prev) => !prev)}
-        onMouseEnter={() => setShowPopup(true)}
-        onMouseLeave={() => setShowPopup(false)}
+        onMouseEnter={() => (isTouch ? "" : setShowPopup(true))}
+        onMouseLeave={() => (isTouch ? "" : setShowPopup(false))}
       >
         <FontAwesomeIcon
           icon={faCircleInfo}
