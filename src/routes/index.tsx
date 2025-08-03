@@ -89,7 +89,7 @@ function Home() {
       ref={elementRef}
       className="light-gradient dark-gradient flex flex-wrap justify-center items-start text-center h-full min-h-screen h-screen overflow-y-auto"
     >
-      <span className="lg:mx-auto lg:max-w-7xl xxl:max-w-[1440px] w-full mx-6 py-8 ">
+      <span className="lg:mx-auto lg:max-w-7xl xxl:max-w-[1440px] w-full px-6 py-8 ">
         <ThemeSwitch />
         <section className="mb-8">
           <h1 className="w-full text-gradient font-nunito text-h1-sm md:text-h1-md lg:text-h1 leading-h1-mobile md:leading-h1 font-bold drop-shadow-main leading-[124px]">
