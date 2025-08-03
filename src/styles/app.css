@@ -81,7 +81,9 @@
   z-index: 0;
 }
 
-.card-bg:hover:before {
+.card-bg:hover:before,
+.card-bg:focus:before,
+.card-bg:focus-within::before {
   top: 0;
   right: 0;
   height: 100%;

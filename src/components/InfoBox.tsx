@@ -23,16 +23,21 @@ const InfoBox = ({
           </p>
         </div>
       )}
-      <div
-        onClick={() => setShowPopup((prev) => !prev)}
+      <button
+        className="info-box"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setShowPopup((prev) => !prev);
+        }}
         onMouseEnter={() => (isTouch ? "" : setShowPopup(true))}
         onMouseLeave={() => (isTouch ? "" : setShowPopup(false))}
       >
         <FontAwesomeIcon
           icon={faCircleInfo}
-          className={`text-4 ml-1 mt-0 shadow-lg ${showPopup ? "text-white" : "text-dark-blue"}`}
+          className={`text-4 px-1 mt-0 shadow-lg ${showPopup && !isTouch ? "text-white" : "text-dark-blue"}`}
         />
-      </div>
+      </button>
     </>
   );
 };

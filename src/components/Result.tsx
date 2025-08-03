@@ -24,6 +24,8 @@ const Result = ({ result, index }) => {
   const isTouchDevice = () => {
     return "ontouchstart" in document.documentElement;
   };
+
+  console.log("is touch", isTouchDevice());
   const Wrapper = result?.webUrl ? "a" : "div";
   const wrapperProps =
     result?.webUrl && !isTouchDevice() ? { href: result.webUrl } : {};
@@ -45,12 +47,14 @@ const Result = ({ result, index }) => {
             {result?.name}
           </h2>
           <span className="ml-2">
-            {isTouchDevice() && result.webUrl ? (
+            {isTouchDevice() && result?.webUrl ? (
               <button onClick={() => window.open(result.webUrl, "_blank")}>
                 {webIcon}
               </button>
-            ) : (
+            ) : result.webUrl ? (
               webIcon
+            ) : (
+              ""
             )}
           </span>
         </span>
@@ -69,7 +73,7 @@ const Result = ({ result, index }) => {
         <span className="relative flex justify-end items-end w-full mt-2">
           <Ratings rating={result.rating} />
           <InfoBox
-            isTouch={isTouchDevice}
+            isTouch={isTouchDevice()}
             rating={result.rating}
             ratingCount={result.ratingCount}
           />
