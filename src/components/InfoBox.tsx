@@ -8,8 +8,8 @@ const InfoBox = ({
   ratingCount,
 }: {
   isTouch: boolean;
-  rating: number;
-  ratingCount: number;
+  rating: string;
+  ratingCount: number | undefined;
 }) => {
   const [showPopup, setShowPopup] = useState(false);
 

@@ -29,6 +29,16 @@ export interface foursquarePlaceType {
   website: string;
 }
 
+export interface searchResultPlacesType {
+  address: string;
+  name: string;
+  phone?: string;
+  price?: string;
+  rating?: string;
+  ratingCount?: number | undefined;
+  webUrl?: string;
+}
+
 export const MAX_RESULTS = 25; // Max results per page
 export const initialSearchResult: searchResultType = {
   places: [],

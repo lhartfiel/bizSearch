@@ -1,4 +1,6 @@
+import { memo } from "react";
 import parsePhoneNumber, { parse } from "libphonenumber-js";
+import { searchResultPlacesType } from "../helpers/constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faGlobe,
@@ -20,7 +22,7 @@ const locationIcon = (
   <FontAwesomeIcon icon={faLocationDot} className="text-body-sm text-salmon" />
 );
 
-const Result = ({ result, index }) => {
+const Result = memo(({ result }: { result: searchResultPlacesType }) => {
   const isTouchDevice = () => {
     return "ontouchstart" in document.documentElement;
   };
@@ -33,7 +35,6 @@ const Result = ({ result, index }) => {
   const phoneNumber =
     result?.phone !== undefined ? parsePhoneNumber(result?.phone, "US") : "";
   const formattedPhone = phoneNumber ? phoneNumber.formatNational() : "N/A";
-
   return (
     <Wrapper
       {...wrapperProps}
@@ -75,12 +76,12 @@ const Result = ({ result, index }) => {
           <InfoBox
             isTouch={isTouchDevice()}
             rating={result.rating}
-            ratingCount={result.ratingCount}
+            ratingCount={result?.ratingCount}
           />
         </span>
       )}
     </Wrapper>
   );
-};
+});
 
 export { Result };
