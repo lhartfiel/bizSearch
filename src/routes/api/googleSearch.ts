@@ -17,6 +17,7 @@ export const ServerRoute = createServerFileRoute("/api/googleSearch").methods({
     });
     if (pageToken) params.append("pagetoken", pageToken);
 
+    // Use the legacy Places API which allows 10k free calls per day
     const searchResponse = await fetch(
       `https://maps.googleapis.com/maps/api/place/textsearch/json?${params}`,
     );

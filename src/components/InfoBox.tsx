@@ -28,7 +28,7 @@ const InfoBox = ({
       >
         <FontAwesomeIcon
           icon={faCircleInfo}
-          className={`text-4 ml-1 mt-0 shadow-lg ${showPopup ? "text-white" : "text-gray-700"}`}
+          className={`text-4 ml-1 mt-0 shadow-lg ${showPopup ? "text-white" : "text-dark-blue"}`}
         />
       </div>
     </>
