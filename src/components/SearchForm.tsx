@@ -1,6 +1,6 @@
 import { useEffect, useState, startTransition, memo, useId } from "react";
 import { useForm } from "@tanstack/react-form";
-import { Result } from "./Result";
+import { SearchResultCard } from "./SearchResultCard";
 import { SkeletonWrapper } from "./SkeletonWrapper";
 import { InputField } from "./InputField";
 import { initialSearchResult, MAX_RESULTS } from "../helpers/constants";
@@ -174,6 +174,7 @@ const SearchForm = memo(() => {
             <Button
               buttonText="Reset"
               buttonType="secondary"
+              // customClasses={`${!nameValue || !locationValue ? "hover:cursor-not-allowed" : "hover:shadow-xl hover:cursor-pointer"} bg-white dark:bg-gradient-dark-start dark:text-white`}
               customClasses={`${!nameValue || !locationValue ? "hover:cursor-not-allowed" : "hover:shadow-xl hover:cursor-pointer"} bg-white dark:bg-gradient-dark-start dark:text-white`}
               disabled={!nameValue || !locationValue ? true : false}
               type="reset"
@@ -182,7 +183,7 @@ const SearchForm = memo(() => {
           </div>
           <Button
             buttonText="Scout"
-            customClasses={`${!nameValue || !locationValue ? "opacity-50 hover:shadow-none! hover:bg-[image:var(--bg-button)]! hover:cursor-not-allowed!" : "hover:cursor-pointer hover:bg-[image:var(--bg-button-hover)] hover:shadow-xl opacity-100"}`}
+            customClasses={`${!nameValue || !locationValue ? "opacity-50 hover:shadow-none! hover:bg-[image:var(--bg-button)]! hover:cursor-not-allowed!" : "transition-all duration-500 ease-in-out bg-size-[200%_100%] bg-position-[100%_0] hover:bg-position-[0_0] hover:shadow-xl opacity-100"}`}
             disabled={!nameValue || !locationValue ? true : false}
             type="submit"
             callback={form.handleSubmit}
@@ -199,7 +200,10 @@ const SearchForm = memo(() => {
           searchResults?.places?.map((result, idx: number) => {
             if (idx + 1 <= MAX_RESULTS * fetchMoreNum) {
               return (
-                <Result result={result} key={`${result?.phone}-${uniqueId}`} />
+                <SearchResultCard
+                  result={result}
+                  key={`${result?.phone}-${uniqueId}`}
+                />
               );
             }
           })}
@@ -223,6 +227,7 @@ const SearchForm = memo(() => {
           <Button
             buttonSize="lg"
             buttonText="Load More"
+            customClasses="transition-all duration-400 ease-in-out bg-size-[200%_100%] bg-position-[100%_0] hover:bg-position-[0_0]"
             callback={handleMoreResults}
           />
         )}

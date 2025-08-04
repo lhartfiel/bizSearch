@@ -18,9 +18,9 @@
 
   --bg-button: linear-gradient(
     45deg,
-    /* top-left to bottom-right */ var(--color-fushia) 0%,
-    var(--color-fushia) 5%,
-    var(--color-salmon) 55%
+    /* top-left to bottom-right */ var(--color-salmon) 0%,
+    var(--color-fushia) 50%,
+    var(--color-salmon) 100%
   );
   --bg-button-hover: linear-gradient(
     90deg,
@@ -67,6 +67,7 @@
 
 .btn-gradient {
   background-image: var(--bg-button);
+  background-size: 200% auto;
 }
 
 .card-bg:before {
@@ -118,6 +119,10 @@
     color: var(--color-white);
   }
 
+  .dark\:bg-dark-blue {
+    background: var(--color-dark-blue);
+  }
+
   .dark-gradient {
     background-image: linear-gradient(
       135deg,
@@ -140,6 +145,6 @@
 
 @media (hover: hover) {
   .hover-bg-button-hover:hover {
-    background-image: var(--bg-button-hover);
+    /* background-image: var(--bg-button-hover); */
   }
 }
