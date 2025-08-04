@@ -2,6 +2,7 @@ import { fetchGoogleResults } from "./fetchGoogleResults";
 import { fetchFoursquareResults } from "./fetchFoursquareResults";
 import { searchResultType } from "../helpers/constants";
 import { dedupResponses } from "../helpers/helperFns";
+import { ApiError } from "../components/ApiError";
 
 /**
  * fetchMainResults
@@ -19,11 +20,11 @@ export const fetchMainResults = async (
   existingResults: searchResultType | undefined,
   setIsEmpty: (value: boolean) => void,
 ) => {
-  let error = false;
-  let combinedResults = existingResults?.places || [];
+  let lastError = { status: "", message: "" };
   let nextGoogleToken = existingResults?.googleNextPage || "";
   let fourNextPage = existingResults?.fourNextPage || "";
-  let fourSquareResults = [];
+
+  const results: any[] = existingResults?.places || [];
 
   // Return ALL results from Google before fetching foursquare results
   if (!fourNextPage && (nextResults === "initial" || nextGoogleToken)) {
@@ -34,52 +35,49 @@ export const fetchMainResults = async (
       existingResults,
     );
     if (googleResponse.error) {
-      error = true;
+      lastError = {
+        status: `${googleResponse?.error.statusText}`,
+        message: `${googleResponse?.error.status}`,
+      };
     } else {
-      combinedResults = dedupResponses([
-        ...combinedResults,
-        ...(googleResponse.places || []),
-      ]);
+      results.push(...(googleResponse.places || []));
       nextGoogleToken = googleResponse.nextPage || "";
-      if (!googleResponse.nextPage) {
-        nextGoogleToken = "";
-      }
     }
   }
-
-  console.log("ERROR", error);
 
   /*
   If the results returned from the Google Response
   are less than the max and does not have next page token,
   fetch more by calling Foursquare
   */
-  if (!nextGoogleToken || error) {
+  if (!nextGoogleToken || lastError?.status.length) {
     const fsResults = await fetchFoursquareResults(
       name,
       location,
       existingResults,
     );
-    console.log("FOUR");
-    fourSquareResults = fsResults.places || [];
-    fourNextPage = fsResults.fourNextPage || "";
-    combinedResults = dedupResponses([
-      ...combinedResults,
-      ...fourSquareResults,
-    ]);
+    if (fsResults.error) {
+      lastError = {
+        status: `${fsResults?.error.status}`,
+        message: `${fsResults.error.statusText}`,
+      };
+    } else {
+      results.push(...(fsResults.places || []));
+      fourNextPage = fsResults.fourNextPage || "";
+    }
   }
 
-  const resultState = {
+  const combinedResults = dedupResponses(results);
+
+  if (lastError?.status.length && combinedResults.length === 0) {
+    throw new ApiError(+lastError.status, lastError.message);
+  }
+
+  setIsEmpty(combinedResults.length === 0);
+
+  return {
     places: combinedResults,
     googleNextPage: nextGoogleToken,
     fourNextPage,
   };
-
-  if (combinedResults.length === 0) {
-    setIsEmpty(true);
-  } else {
-    setIsEmpty(false);
-  }
-
-  return resultState;
 };

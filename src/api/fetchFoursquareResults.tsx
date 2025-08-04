@@ -13,10 +13,12 @@ export const fetchFoursquareResults = async (
   const foursquareRes = await fetch(
     `/api/foursquareSearch?name=${encodeURIComponent(name)}&location=${location}${foursquareUrl}`,
   );
-  const foursquareJson = await foursquareRes.json();
-  console.log("jsonFOUR", foursquareJson);
 
-  if (foursquareJson.error) return;
+  if (!foursquareRes.ok) {
+    console.error("Foursquare fetch failed:", foursquareRes.statusText);
+    return { error: foursquareRes };
+  }
+  const foursquareJson = await foursquareRes.json();
 
   const foursquareNewObj = foursquareJson.results.map(
     (item: foursquarePlaceType) => {

@@ -27,7 +27,6 @@ const Result = memo(({ result }: { result: searchResultPlacesType }) => {
     return "ontouchstart" in document.documentElement;
   };
 
-  console.log("is touch", isTouchDevice());
   const Wrapper = result?.webUrl ? "a" : "div";
   const wrapperProps =
     result?.webUrl && !isTouchDevice() ? { href: result.webUrl } : {};

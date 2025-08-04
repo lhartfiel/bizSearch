@@ -10,6 +10,7 @@ import { useStore } from "@tanstack/react-form";
 import { Button } from "./Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
+import { getErrorFriendlyMessage } from "../helpers/errorMessages";
 
 const alertIcon = (
   <FontAwesomeIcon
@@ -32,8 +33,6 @@ const SearchForm = memo(() => {
     queryClient.setQueryData(["search", "initial"], initialSearchResult);
   }, [queryClient]);
 
-  console.log("search name", searchName);
-
   const {
     isLoading,
     isFetching,
@@ -53,6 +52,14 @@ const SearchForm = memo(() => {
     enabled: isSubmitted, // disable autofetching
     staleTime: 1000 * 60 * 30, // controls background refresh every 30 minutes
     gcTime: 1000 * 60 * 60, // keeps cache in memory for 1 hour
+    retry: (failureCount, error) => {
+      const status = (error as any)?.status;
+      if (status) {
+        if (status === 404) return false; // no retry on 404
+        if (status >= 400 && status < 500 && status !== 429) return false; // no retry on client errors except 429
+      }
+      return failureCount < 2; // retry twice on server errors or unknown status
+    },
   });
 
   useEffect(() => {
@@ -61,8 +68,6 @@ const SearchForm = memo(() => {
       setIsSubmitted(false);
     }
   }, [isFetching, isSubmitted]);
-
-  console.log("isError", isError);
 
   const handleInitialSearch = async (name: string, location: string) => {
     if (!name && !location) {
@@ -77,7 +82,6 @@ const SearchForm = memo(() => {
     // Store last search for index.tsx scroll logic
     queryClient.setQueryData(["lastSearch"], { name, location });
   };
-
   const handleMoreResults = async () => {
     setFetchMoreNum((prev) => prev + 1);
 
@@ -114,7 +118,7 @@ const SearchForm = memo(() => {
     },
     {
       name: "location",
-      label: "Location (Chicago)",
+      label: "Location (Chicago, IL)",
       placeholder: "Enter Location",
     },
   ];
@@ -195,11 +199,7 @@ const SearchForm = memo(() => {
           searchResults?.places?.map((result, idx: number) => {
             if (idx + 1 <= MAX_RESULTS * fetchMoreNum) {
               return (
-                <Result
-                  result={result}
-                  key={`${result?.phone}-${uniqueId}`}
-                  index={idx}
-                />
+                <Result result={result} key={`${result?.phone}-${uniqueId}`} />
               );
             }
           })}
@@ -213,7 +213,7 @@ const SearchForm = memo(() => {
         {isError && (
           <p className="flex items-center justify-center text-center col-span-12 md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3 text-dark-blue">
             {alertIcon}
-            An error has been returned. {error.message}
+            {error.message}
           </p>
         )}
         {(searchResults?.googleNextPage?.length > 0 ||

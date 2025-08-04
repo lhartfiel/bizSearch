@@ -16,7 +16,7 @@ interface FieldProps {
   handleChange: (value: string) => void;
 }
 
-const DEBOUNCE_DELAY = 300;
+const DEBOUNCE_DELAY = 400;
 
 const DebouncedInput = ({
   field,

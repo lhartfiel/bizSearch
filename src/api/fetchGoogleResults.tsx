@@ -19,7 +19,7 @@ export const fetchGoogleResults = async (
   );
 
   if (!googleRes.ok) {
-    console.error("Fetch failed:", googleRes.statusText);
+    console.error("Google fetch failed:", googleRes.statusText);
     return { error: googleRes };
   }
 
