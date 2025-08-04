@@ -42,7 +42,6 @@ export const Route = createRootRoute({
 });
 
 function themeReducer(theme, action) {
-  console.log("theme", theme);
   switch (theme) {
     case "light":
       return "dark";
