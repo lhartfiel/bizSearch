@@ -27,24 +27,20 @@ const isTouchDevice = () => {
 const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
   columnHelper.group({
     id: "search",
-    // header: () => {},
-    // footer: props => props.column.id,
     columns: [
       columnHelper.accessor((row) => row?.name, {
         id: "name",
         cell: (info) => info.getValue(),
         header: () => <span>Name</span>,
         size: 200,
-        minSize: 100,
-        // footer: (props) => props.column.id,
+        minSize: 150,
       }),
       columnHelper.accessor((row) => row.address, {
         id: "address",
         cell: (info) => info.getValue(),
         header: () => <span>Address</span>,
-        // footer: (props) => props.column.id,
         size: 200,
-        minSize: 100,
+        minSize: 150,
       }),
       columnHelper.accessor((row) => row.phone, {
         id: "phone",
@@ -58,8 +54,7 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
           return formattedPhone;
         },
         header: () => <span>Phone</span>,
-        // footer: (props) => props.column.id,
-        // minSize: 250,
+        minSize: 150,
         size: 200,
       }),
       columnHelper.accessor((row) => row.rating, {
@@ -74,14 +69,13 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
                   isTouch={isTouchDevice()}
                   rating={info.getValue()}
                   ratingCount={info.row.original?.ratingCount}
+                  showHover={false}
                 />
               </span>
             );
           }
         },
         header: () => <span>Rating</span>,
-        // footer: (props) => props.column.id,
-        // minSize: 250,
         size: 150,
       }),
       columnHelper.accessor((row) => row.webUrl, {
@@ -89,8 +83,6 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
         cell: (info) =>
           info.getValue() ? <a href={info.getValue()}>{webIcon}</a> : "–",
         header: () => <span>Url</span>,
-        // footer: (props) => props.column.id,
-        // minSize: 150,
         size: 100,
       }),
     ],
@@ -108,11 +100,12 @@ const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    columnResizeMode: "onChange",
   });
 
   return (
     <div className="col-start-1 col-span-12 md:col-start-2 md:col-span-10 lg:col-start-2 p-2 w-full max-w-full pt-4 overflow-y-auto overflow-x-auto">
-      <table className="shadow-card bg-white w-full rounded-[8px] overflow-hidden">
+      <table className="shadow-card bg-white w-full rounded-[8px] overflow-hidden table-fixed md:table-auto">
         <thead>
           {table.getHeaderGroups().map(
             (headerGroup, idx) =>
@@ -125,6 +118,7 @@ const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
                     <th
                       key={header.id}
                       colSpan={header.colSpan}
+                      style={{ width: header.getSize() }}
                       className="font-semibold text-[16px] py-3"
                     >
                       {header.isPlaceholder
@@ -139,7 +133,7 @@ const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
               ),
           )}
         </thead>
-        <tbody>
+        <tbody className="w-full overflow-x-auto">
           {table.getRowModel().rows.map((row) => (
             <tr key={row.id} className="border-1 border-gray-200">
               {row.getVisibleCells().map((cell) => (

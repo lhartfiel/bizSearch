@@ -6,10 +6,12 @@ const InfoBox = ({
   isTouch,
   rating,
   ratingCount,
+  showHover,
 }: {
   isTouch: boolean;
   rating: string;
   ratingCount: number | undefined;
+  showHover?: boolean;
 }) => {
   const [showPopup, setShowPopup] = useState(false);
 
@@ -24,6 +26,7 @@ const InfoBox = ({
         </div>
       )}
       <button
+        role="button"
         className="info-box"
         onClick={(e) => {
           e.stopPropagation();
@@ -35,7 +38,7 @@ const InfoBox = ({
       >
         <FontAwesomeIcon
           icon={faCircleInfo}
-          className={`text-4 px-1 mt-0 shadow-lg ${showPopup && !isTouch ? "text-white" : "text-dark-blue"}`}
+          className={`text-4 px-1 mt-0 shadow-lg ${showPopup && !isTouch && showHover ? "text-white" : "text-dark-blue"}`}
         />
       </button>
     </>

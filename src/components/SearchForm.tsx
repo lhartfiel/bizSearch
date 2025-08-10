@@ -207,7 +207,10 @@ const SearchForm = memo(() => {
           })}
         {!isLoading && searchResults?.places?.length > 0 && (
           <>
-            <SearchResultViews handleViewChange={handleViewChange} />
+            <SearchResultViews
+              handleViewChange={handleViewChange}
+              view={view}
+            />
             {view === "table" && <SearchTable result={searchResults.places} />}
 
             {view === "card" && (
