@@ -3,7 +3,11 @@ import { useForm } from "@tanstack/react-form";
 import { SearchResultCard } from "./SearchResultCard";
 import { SkeletonWrapper } from "./SkeletonWrapper";
 import { InputField } from "./InputField";
-import { initialSearchResult, MAX_RESULTS } from "../helpers/constants";
+import {
+  initialSearchResult,
+  MAX_RESULTS,
+  searchResultPlacesType,
+} from "../helpers/constants";
 import { fetchMainResults } from "../api/fetchMainResults";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useStore } from "@tanstack/react-form";
@@ -12,6 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { getErrorFriendlyMessage } from "../helpers/errorMessages";
 import { SearchTable } from "./SearchTable";
+import { SearchResultViews } from "./SearchResultViews";
 
 const alertIcon = (
   <FontAwesomeIcon
@@ -26,6 +31,7 @@ const SearchForm = memo(() => {
   const [fetchMoreNum, setFetchMoreNum] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
+  const [view, setView] = useState("card");
   const uniqueId = useId();
 
   const queryClient = useQueryClient();
@@ -148,6 +154,9 @@ const SearchForm = memo(() => {
     form.reset();
   };
 
+  const handleViewChange = (value: string) => {
+    setView(value);
+  };
   return (
     <>
       <form
@@ -198,20 +207,25 @@ const SearchForm = memo(() => {
           })}
         {!isLoading && searchResults?.places?.length > 0 && (
           <>
-            <SearchTable result={searchResults.places} />
+            <SearchResultViews handleViewChange={handleViewChange} />
+            {view === "table" && <SearchTable result={searchResults.places} />}
 
-            {searchResults?.places?.map((result, idx: number) => {
-              if (idx + 1 <= MAX_RESULTS * fetchMoreNum) {
-                return (
-                  <>
-                    <SearchResultCard
-                      result={result}
-                      key={`${result?.phone}-${uniqueId}`}
-                    />
-                  </>
-                );
-              }
-            })}
+            {view === "card" && (
+              <div className="grid col-span-12 grid-cols-subgrid">
+                {searchResults?.places?.map(
+                  (result: searchResultPlacesType, idx: number) => {
+                    if (idx + 1 <= MAX_RESULTS * fetchMoreNum) {
+                      return (
+                        <SearchResultCard
+                          result={result}
+                          key={`${result?.phone}-${uniqueId}`}
+                        />
+                      );
+                    }
+                  },
+                )}
+              </div>
+            )}
           </>
         )}
         {!isLoading && isEmpty && searchResults?.places?.length === 0 && (

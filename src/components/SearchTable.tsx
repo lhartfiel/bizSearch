@@ -11,8 +11,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 import { Ratings } from "./Ratings";
 import { InfoBox } from "./InfoBox";
-import { cleanedPhoneNum } from "../helpers/helperFns";
 import parsePhoneNumber, { parse } from "libphonenumber-js";
+import { useEffect } from "react";
 
 const webIcon = (
   <FontAwesomeIcon icon={faGlobe} className="text-h2 text-bright-salmon" />
@@ -65,7 +65,6 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
       columnHelper.accessor((row) => row.rating, {
         id: "rating",
         cell: (info) => {
-          console.log("info", info);
           if (!info.getValue()) return "–";
           {
             return (
@@ -99,14 +98,18 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
 ];
 
 const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
-  console.log(result);
   const [data, _setData] = useState(() => [...result]);
   const [columns] = useState<typeof defaultColumns>(() => [...defaultColumns]);
+
+  useEffect(() => {
+    _setData([...result]);
+  }, [result]);
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
   return (
     <div className="col-start-1 col-span-12 md:col-start-2 md:col-span-10 lg:col-start-2 p-2 w-full max-w-full pt-4 overflow-y-auto overflow-x-auto">
       <table className="shadow-card bg-white w-full rounded-[8px] overflow-hidden">
