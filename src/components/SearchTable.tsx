@@ -2,12 +2,17 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
+  ColumnDef,
   useReactTable,
 } from "@tanstack/react-table";
 import { useState, useReducer } from "react";
 import { searchResultPlacesType } from "../helpers/constants";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons";
+import { Ratings } from "./Ratings";
+import { InfoBox } from "./InfoBox";
+import { cleanedPhoneNum } from "../helpers/helperFns";
+import parsePhoneNumber, { parse } from "libphonenumber-js";
 
 const webIcon = (
   <FontAwesomeIcon icon={faGlobe} className="text-h2 text-bright-salmon" />
@@ -15,80 +20,135 @@ const webIcon = (
 
 const columnHelper = createColumnHelper<searchResultPlacesType>();
 
-const columns = [
+const isTouchDevice = () => {
+  return "ontouchstart" in document.documentElement;
+};
+
+const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
   columnHelper.group({
     id: "search",
-    header: () => <span>Search Results</span>,
+    // header: () => {},
     // footer: props => props.column.id,
     columns: [
       columnHelper.accessor((row) => row?.name, {
         id: "name",
         cell: (info) => info.getValue(),
         header: () => <span>Name</span>,
-        footer: (props) => props.column.id,
+        size: 200,
+        minSize: 100,
+        // footer: (props) => props.column.id,
       }),
       columnHelper.accessor((row) => row.address, {
         id: "address",
         cell: (info) => info.getValue(),
         header: () => <span>Address</span>,
-        footer: (props) => props.column.id,
+        // footer: (props) => props.column.id,
+        size: 200,
+        minSize: 100,
       }),
       columnHelper.accessor((row) => row.phone, {
         id: "phone",
-        cell: (info) => info.getValue(),
+        cell: (info) => {
+          const phoneNumber = info.getValue()
+            ? parsePhoneNumber(info.getValue(), "US")
+            : "";
+          const formattedPhone = phoneNumber
+            ? phoneNumber.formatNational()
+            : "–";
+          return formattedPhone;
+        },
         header: () => <span>Phone</span>,
-        footer: (props) => props.column.id,
+        // footer: (props) => props.column.id,
+        // minSize: 250,
+        size: 200,
       }),
       columnHelper.accessor((row) => row.rating, {
         id: "rating",
-        cell: (info) => info.getValue(),
+        cell: (info) => {
+          console.log("info", info);
+          if (!info.getValue()) return "–";
+          {
+            return (
+              <span className="relative flex justify-center items-center w-full mt-2">
+                <Ratings rating={info.getValue()} />
+                <InfoBox
+                  isTouch={isTouchDevice()}
+                  rating={info.getValue()}
+                  ratingCount={info.row.original?.ratingCount}
+                />
+              </span>
+            );
+          }
+        },
         header: () => <span>Rating</span>,
-        footer: (props) => props.column.id,
+        // footer: (props) => props.column.id,
+        // minSize: 250,
+        size: 150,
       }),
       columnHelper.accessor((row) => row.webUrl, {
         id: "url",
         cell: (info) =>
           info.getValue() ? <a href={info.getValue()}>{webIcon}</a> : "–",
         header: () => <span>Url</span>,
-        footer: (props) => props.column.id,
+        // footer: (props) => props.column.id,
+        // minSize: 150,
+        size: 100,
       }),
     ],
   }),
 ];
 
-const SearchTable = ({ result }) => {
+const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
   console.log(result);
   const [data, _setData] = useState(() => [...result]);
-  const rerender = useReducer(() => ({}), {})[1];
+  const [columns] = useState<typeof defaultColumns>(() => [...defaultColumns]);
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
   return (
-    <div className="bg-white col-start-1 col-span-12 md:col-start-2 md:col-span-10 lg:col-start-2 p-2">
-      <table>
+    <div className="col-start-1 col-span-12 md:col-start-2 md:col-span-10 lg:col-start-2 p-2 w-full max-w-full pt-4 overflow-y-auto overflow-x-auto">
+      <table className="shadow-card bg-white w-full rounded-[8px] overflow-hidden">
         <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th key={header.id} colSpan={header.colSpan}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
+          {table.getHeaderGroups().map(
+            (headerGroup, idx) =>
+              idx !== 0 && (
+                <tr
+                  key={headerGroup.id}
+                  className="bg-gray-300 shadow-sm uppercase"
+                >
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className="font-semibold text-[16px] py-3"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ),
+          )}
         </thead>
         <tbody>
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id}>
+            <tr key={row.id} className="border-1 border-gray-200">
               {row.getVisibleCells().map((cell) => (
-                <td key={cell.id}>
+                <td
+                  {...{
+                    key: cell.id,
+                    style: {
+                      padding: "12px",
+                      width: cell.column.getSize(),
+                    },
+                  }}
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
@@ -99,7 +159,11 @@ const SearchTable = ({ result }) => {
           {table.getFooterGroups().map((footerGroup) => (
             <tr key={footerGroup.id}>
               {footerGroup.headers.map((header) => (
-                <th key={header.id} colSpan={header.colSpan}>
+                <th
+                  key={header.id}
+                  colSpan={header.colSpan}
+                  className={`${header.isPlaceholder} ? '' : 'py-2'`}
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -113,9 +177,6 @@ const SearchTable = ({ result }) => {
         </tfoot>
       </table>
       <div className="h-4" />
-      <button onClick={() => rerender()} className="border p-2">
-        Rerender
-      </button>
     </div>
   );
 };

@@ -149,11 +149,11 @@
   }
 }
 
-table {
+/* table {
   border: 1px solid lightgray;
-}
+} */
 
-tbody {
+/* tbody {
   border-bottom: 1px solid lightgray;
 }
 
@@ -161,12 +161,12 @@ th {
   border-bottom: 1px solid lightgray;
   border-right: 1px solid lightgray;
   padding: 2px 4px;
-}
+} */
 
-tfoot {
+/* tfoot {
   color: gray;
 }
 
 tfoot th {
   font-weight: normal;
-}
+} */
