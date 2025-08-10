@@ -61,6 +61,7 @@ const DebouncedInput = ({
       </label>
       <input
         className="w-full border-1 border-gray-500 rounded-md p-2 placeholder-zinc-400 text-zinc-600 dark:placeholder-white dark:text-white mb-6 md:mb-0"
+        id={name}
         placeholder={placeholder}
         value={localValue}
         onBlur={(e) => {
@@ -68,6 +69,7 @@ const DebouncedInput = ({
           field.handleChange(localValue); // ensure blur saves immediately
           field.handleBlur(e);
         }}
+        name={name}
         onChange={(e) => setLocalValue(e.target.value)}
       />
     </span>

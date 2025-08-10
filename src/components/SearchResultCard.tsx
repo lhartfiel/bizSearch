@@ -47,7 +47,10 @@ const SearchResultCard = memo(
             </h2>
             <span className="ml-2">
               {isTouchDevice() && result?.webUrl ? (
-                <button onClick={() => window.open(result.webUrl, "_blank")}>
+                <button
+                  role="button"
+                  onClick={() => window.open(result.webUrl, "_blank")}
+                >
                   {webIcon}
                 </button>
               ) : result.webUrl ? (

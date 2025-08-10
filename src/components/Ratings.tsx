@@ -6,7 +6,7 @@ const Ratings = ({ rating }: { rating: number | string }) => {
   const fillPercent = (rating / totalStars) * 100;
 
   return (
-    <div className="relative inline-flex items-end  w-fit">
+    <div className="relative inline-flex items-end w-fit">
       {/* Display the empty 5 stars */}
       {Array.from({ length: totalStars }, (_, index) => {
         return (

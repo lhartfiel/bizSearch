@@ -12,7 +12,8 @@ const ThemeSwitch = () => {
   return (
     <div className="flex justify-end w-full mb-4">
       <button
-        className="bg-white dark:bg-slate-300 rounded-full w-9 h-9 border-1 border-slate-800"
+        role="button"
+        className="cursor-pointer bg-white dark:bg-slate-300 rounded-full w-9 h-9 border-1 border-slate-800"
         onClick={dispatch ? () => dispatch(theme) : undefined}
       >
         {theme === "light" ? sunIcon : moonIcon}
