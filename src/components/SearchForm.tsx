@@ -60,7 +60,6 @@ const SearchForm = memo(() => {
     staleTime: 1000 * 60 * 30, // controls background refresh every 30 minutes
     gcTime: 1000 * 60 * 60, // keeps cache in memory for 1 hour
     retry: (failureCount, error) => {
-      console.log("error", error);
       const status = (error as any)?.status;
       if (status) {
         if (status === 404) return false; // no retry on 404
