@@ -26,6 +26,7 @@ const SearchResultViews = ({
       {views.map((vw) => {
         return (
           <button
+            key={vw.type}
             type="button"
             aria-label={`{vw.type} view`}
             onClick={() => handleViewChange(vw.type)}

@@ -14,7 +14,6 @@ import { useStore } from "@tanstack/react-form";
 import { Button } from "./Button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
-import { getErrorFriendlyMessage } from "../helpers/errorMessages";
 import { SearchTable } from "./SearchTable";
 import { SearchResultViews } from "./SearchResultViews";
 
@@ -31,6 +30,7 @@ const SearchForm = memo(() => {
   const [fetchMoreNum, setFetchMoreNum] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [view, setView] = useState("card");
   const uniqueId = useId();
 
@@ -90,6 +90,7 @@ const SearchForm = memo(() => {
     queryClient.setQueryData(["lastSearch"], { name, location });
   };
   const handleMoreResults = async () => {
+    setIsLoadingMore(true);
     setFetchMoreNum((prev) => prev + 1);
 
     await queryClient.fetchQuery({
@@ -103,6 +104,7 @@ const SearchForm = memo(() => {
           setIsEmpty,
         ),
     });
+    setIsLoadingMore(false);
   };
 
   const form = useForm({
@@ -184,7 +186,6 @@ const SearchForm = memo(() => {
             <Button
               buttonText="Reset"
               buttonType="secondary"
-              // customClasses={`${!nameValue || !locationValue ? "hover:cursor-not-allowed" : "hover:shadow-xl hover:cursor-pointer"} bg-white dark:bg-gradient-dark-start dark:text-white`}
               customClasses={`${!nameValue || !locationValue ? "hover:cursor-not-allowed" : "hover:shadow-xl hover:cursor-pointer"} bg-white dark:bg-gradient-dark-start dark:text-white`}
               disabled={!nameValue || !locationValue ? true : false}
               type="reset"
@@ -250,9 +251,10 @@ const SearchForm = memo(() => {
             searchResults?.places.length > MAX_RESULTS * fetchMoreNum)) && (
           <Button
             buttonSize="lg"
-            buttonText="Load More"
-            customClasses="transition-all duration-400 ease-in-out bg-size-[200%_100%] bg-position-[100%_0] hover:bg-position-[0_0]"
+            buttonText={isLoadingMore ? "Loading..." : "Load More"}
+            customClasses={`${isLoadingMore && "opacity-50 hover:shadow-none! hover:bg-[image:var(--bg-button)]! hover:cursor-not-allowed!"} transition-all duration-400 ease-in-out bg-size-[200%_100%] bg-position-[100%_0] hover:bg-position-[0_0]`}
             callback={handleMoreResults}
+            disabled={isLoadingMore}
           />
         )}
       </section>
