@@ -1,7 +1,7 @@
 export interface searchResultType {
-  places: any[];
-  googleNextPage: string;
-  fourNextPage: string;
+  places?: any[];
+  googleNextPage?: string;
+  fourNextPage?: string;
 }
 
 export interface googlePlaceType {
@@ -37,6 +37,10 @@ export interface searchResultPlacesType {
   rating?: string;
   ratingCount?: number | undefined;
   webUrl?: string;
+}
+
+export interface fetchResponseType extends searchResultType {
+  error?: { status: number; statusText: string };
 }
 
 export const MAX_RESULTS = 25; // Max results per page

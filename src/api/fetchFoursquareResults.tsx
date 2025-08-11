@@ -7,7 +7,7 @@ export const fetchFoursquareResults = async (
   location: string,
   existingResults?: searchResultType,
 ) => {
-  const foursquareUrl = existingResults?.fourNextPage.length
+  const foursquareUrl = existingResults?.fourNextPage?.length
     ? `&fourNextPage=${existingResults.fourNextPage}`
     : "";
   const foursquareRes = await fetch(
@@ -16,9 +16,26 @@ export const fetchFoursquareResults = async (
 
   if (!foursquareRes.ok) {
     console.error("Foursquare fetch failed:", foursquareRes.statusText);
-    return { error: foursquareRes };
+    return {
+      error: {
+        status: foursquareRes.status,
+        statusText: foursquareRes.statusText,
+      },
+    };
   }
+
   const foursquareJson = await foursquareRes.json();
+
+  if (foursquareJson.error) {
+    // Example: "400: Bad Request"
+    const [statusCode, statusText] = foursquareJson.error.split(":");
+    return {
+      error: {
+        status: +statusCode || 500,
+        statusText: statusText?.trim() || "Unknown API error",
+      },
+    };
+  }
 
   const foursquareNewObj = foursquareJson.results.map(
     (item: foursquarePlaceType) => {
