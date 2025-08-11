@@ -1,6 +1,6 @@
 import { fetchGoogleResults } from "./fetchGoogleResults";
 import { fetchFoursquareResults } from "./fetchFoursquareResults";
-import { searchResultType } from "../helpers/constants";
+import { searchResultType, fetchResponseType } from "../helpers/constants";
 import { dedupResponses } from "../helpers/helperFns";
 import { ApiError } from "../components/ApiError";
 
@@ -20,11 +20,29 @@ export const fetchMainResults = async (
   existingResults: searchResultType | undefined,
   setIsEmpty: (value: boolean) => void,
 ) => {
-  let lastError = { status: "", message: "" };
+  let lastError: { status: number; message: string } | null = null;
   let nextGoogleToken = existingResults?.googleNextPage || "";
   let fourNextPage = existingResults?.fourNextPage || "";
-
   const results: any[] = existingResults?.places || [];
+
+  const handleResponse = (
+    res: fetchResponseType,
+    apiCall: "google" | "foursquare",
+  ) => {
+    if (res.error) {
+      lastError = {
+        status: res.error.status,
+        message: res.error.statusText,
+      };
+    } else {
+      results.push(...(res.places || []));
+      if (apiCall === "google") {
+        nextGoogleToken = res.googleNextPage || "";
+      } else if (apiCall === "foursquare") {
+        fourNextPage = res.fourNextPage || "";
+      }
+    }
+  };
 
   // Return ALL results from Google before fetching foursquare results
   if (!fourNextPage && (nextResults === "initial" || nextGoogleToken)) {
@@ -34,15 +52,7 @@ export const fetchMainResults = async (
       nextResults,
       existingResults,
     );
-    if (googleResponse.error) {
-      lastError = {
-        status: `${googleResponse?.error.statusText}`,
-        message: `${googleResponse?.error.status}`,
-      };
-    } else {
-      results.push(...(googleResponse.places || []));
-      nextGoogleToken = googleResponse.nextPage || "";
-    }
+    handleResponse(googleResponse, "google");
   }
 
   /*
@@ -50,27 +60,21 @@ export const fetchMainResults = async (
   are less than the max and does not have next page token,
   fetch more by calling Foursquare
   */
-  if (!nextGoogleToken || lastError?.status.length) {
+  if (!nextGoogleToken || lastError !== null) {
     const fsResults = await fetchFoursquareResults(
       name,
       location,
       existingResults,
     );
-    if (fsResults.error) {
-      lastError = {
-        status: `${fsResults?.error.status}`,
-        message: `${fsResults.error.statusText}`,
-      };
-    } else {
-      results.push(...(fsResults.places || []));
-      fourNextPage = fsResults.fourNextPage || "";
-    }
+
+    handleResponse(fsResults, "foursquare");
   }
 
   const combinedResults = dedupResponses(results);
 
-  if (lastError?.status.length && combinedResults.length === 0) {
-    throw new ApiError(+lastError.status, lastError.message);
+  if (lastError !== null && combinedResults.length === 0) {
+    const err = lastError as { status: number; message: string };
+    throw new ApiError(err.status, err.message);
   }
 
   setIsEmpty(combinedResults.length === 0);

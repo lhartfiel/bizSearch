@@ -8,7 +8,7 @@ export const fetchGoogleResults = async (
   existingResults: searchResultType | undefined,
 ) => {
   const nextParam =
-    initialNext === "initial" ? 0 : existingResults?.googleNextPage.length;
+    initialNext === "initial" ? 0 : existingResults?.googleNextPage?.length;
   const googleUrl =
     nextParam && nextParam !== 0
       ? `&pagetoken=${existingResults?.googleNextPage}`
@@ -17,14 +17,26 @@ export const fetchGoogleResults = async (
   const googleRes = await fetch(
     `/api/googleSearch?searchTerm=${encodeURIComponent(googleTerm)}${googleUrl}`,
   );
-
+  const googleJson = await googleRes.json();
   if (!googleRes.ok) {
     console.error("Google fetch failed:", googleRes.statusText);
-    return { error: googleRes };
+    return {
+      error: { status: googleJson.status, statusText: googleJson.statusText },
+    };
   }
 
-  const googleJson = await googleRes.json();
-  const nextPage = googleJson.nextPageToken;
+  if (googleJson.error) {
+    // Example: "400: Bad Request"
+    const [statusCode, statusText] = googleJson.error.split(":");
+    return {
+      error: {
+        status: +statusCode || 500,
+        statusText: statusText?.trim() || "Unknown API error",
+      },
+    };
+  }
+
+  const googleNextPage = googleJson.nextPageToken;
   const googleNewObj = googleJson?.places.map((item: googlePlaceType) => {
     const num = cleanedPhoneNum(item?.phone);
 
@@ -42,5 +54,5 @@ export const fetchGoogleResults = async (
       webUrl: item?.webUrl,
     };
   });
-  return { places: googleNewObj, nextPage };
+  return { places: googleNewObj, googleNextPage };
 };
