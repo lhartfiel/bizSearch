@@ -81,7 +81,11 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
       columnHelper.accessor((row) => row.webUrl, {
         id: "url",
         cell: (info) =>
-          info.getValue() ? <a href={info.getValue()}>{webIcon}</a> : "–",
+          info.getValue() && isTouchDevice() ? (
+            <a href={info.getValue()}>{webIcon}</a>
+          ) : (
+            "–"
+          ),
         header: () => <span>Url</span>,
         size: 100,
       }),
@@ -135,7 +139,19 @@ const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
         </thead>
         <tbody className="w-full overflow-x-auto">
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-1 border-gray-200">
+            <tr
+              role="button"
+              key={row.id}
+              tabIndex={0}
+              onClick={() => window.open(row.getValue("url"))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  !isTouchDevice() && window.open(row.getValue("url"));
+                }
+              }}
+              className={`border-1 border-gray-200 bg-transparent transition duration-300 ${row.getValue("url") && "hover:cursor-pointer hover:font-semibold hover:shadow-md hover:bg-salmon/15 "}`}
+            >
               {row.getVisibleCells().map((cell) => (
                 <td
                   {...{
