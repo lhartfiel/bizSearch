@@ -11,12 +11,8 @@ import {
 import { NotFound } from "../components/NotFound";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeContext, ThemeDispatchContext } from "../contexts/ThemeContext";
+import { ModalContext, ModalDispatchContext } from "../contexts/ModalContext";
 import { useReducer } from "react";
-import {
-  SearchResultContext,
-  SearchResultDispatchContext,
-} from "../contexts/SearchResultContext";
-import { resultsReducer } from "../contexts/SearchResultContext";
 import { initialSearchResult } from "../helpers/constants";
 
 const queryClient = new QueryClient();
@@ -67,7 +63,7 @@ export const Route = createRootRoute({
   component: RootComponent,
 });
 
-function themeReducer(theme, action) {
+function themeReducer(theme: string) {
   switch (theme) {
     case "light":
       return "dark";
@@ -78,38 +74,43 @@ function themeReducer(theme, action) {
   }
 }
 
+function modalReducer(modalValue: boolean) {
+  return !modalValue;
+}
+
 function RootComponent() {
-  const [results, dispatch] = useReducer(resultsReducer, initialSearchResult);
   return (
     <RootDocument>
       <QueryClientProvider client={queryClient}>
-        <SearchResultContext.Provider value={results}>
-          <SearchResultDispatchContext.Provider value={dispatch}>
-            <Outlet />
-          </SearchResultDispatchContext.Provider>
-        </SearchResultContext.Provider>
+        <Outlet />
       </QueryClientProvider>
     </RootDocument>
   );
 }
 
 const initialTheme = "light";
+const initialModal = false;
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
-  const [theme, dispatch] = useReducer(themeReducer, initialTheme);
+  const [theme, themeDispatch] = useReducer(themeReducer, initialTheme);
+  const [modal, modalDispatch] = useReducer(modalReducer, initialModal);
 
   return (
     <ThemeContext.Provider value={theme}>
-      <ThemeDispatchContext.Provider value={dispatch}>
-        <html className={`${theme === "dark" ? "dark" : ""}`}>
-          <head>
-            <HeadContent />
-          </head>
-          <body>
-            {children}
-            <Scripts />
-          </body>
-        </html>
+      <ThemeDispatchContext.Provider value={themeDispatch}>
+        <ModalContext.Provider value={modal}>
+          <ModalDispatchContext.Provider value={modalDispatch}>
+            <html className={`${theme === "dark" ? "dark" : ""}`}>
+              <head>
+                <HeadContent />
+              </head>
+              <body>
+                {children}
+                <Scripts />
+              </body>
+            </html>
+          </ModalDispatchContext.Provider>
+        </ModalContext.Provider>
       </ThemeDispatchContext.Provider>
     </ThemeContext.Provider>
   );

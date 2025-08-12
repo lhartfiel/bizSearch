@@ -240,7 +240,7 @@ const SearchForm = memo(() => {
           </h2>
         )}
         {isError && (
-          <p className="flex items-center justify-center text-center col-span-12 md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3 text-dark-blue">
+          <p className="flex items-center justify-center text-center col-span-12 md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3 text-dark-blue dark:text-white">
             {alertIcon}
             {error.message}
           </p>

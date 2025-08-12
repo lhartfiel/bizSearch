@@ -1,13 +1,15 @@
 // src/routes/index.tsx
+import { useContext } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { SearchForm } from "../components/SearchForm";
 import { ThemeSwitch } from "../components/ThemeSwitch";
-import { SearchResultContext } from "../contexts/SearchResultContext";
-import { useRef, useEffect, useState, useContext } from "react";
+import { useRef, useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleUp } from "@fortawesome/free-solid-svg-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { Footer } from "../components/Footer";
+import { Modal } from "../components/Modal";
+import { ModalContext } from "../contexts/ModalContext";
 
 const iconUp = <FontAwesomeIcon className="text-white" icon={faAngleUp} />;
 
@@ -39,7 +41,7 @@ function useElementScrollPosition(ref: React.RefObject<HTMLDivElement | null>) {
 }
 
 function Home() {
-  // const searchResults = useContext(SearchResultContext);
+  const showModal = useContext(ModalContext);
   const elementRef = useRef<HTMLDivElement>(null);
   const [hasScrollbar, setHasScrollbar] = useState(false);
   const scrollYPos = useElementScrollPosition(elementRef);
@@ -90,7 +92,8 @@ function Home() {
       ref={elementRef}
       className="light-gradient dark-gradient flex flex-wrap justify-center items-between text-center h-full min-h-screen h-screen overflow-y-auto"
     >
-      <span className="lg:mx-auto lg:max-w-7xl xxl:max-w-[1440px] w-full px-6 py-8 ">
+      {<Modal showModal={showModal} />}
+      <span className="lg:mx-auto lg:max-w-7xl xxl:max-w-[1440px] w-full px-6 py-8">
         <ThemeSwitch />
         <section className="mb-8">
           <h1 className="w-full text-gradient font-nunito text-h1-sm md:text-h1-md lg:text-h1 leading-h1-mobile md:leading-h1 font-bold drop-shadow-main leading-[124px]">
