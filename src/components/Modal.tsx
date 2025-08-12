@@ -1,18 +1,24 @@
+import { useContext } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClose } from "@fortawesome/free-solid-svg-icons";
-import { useContext } from "react";
 import { ModalContext, ModalDispatchContext } from "../contexts/ModalContext";
 
-const iconClose = <FontAwesomeIcon icon={faClose} className="text-h2" />;
+const iconClose = (
+  <FontAwesomeIcon icon={faClose} className="text-[28px] text-salmon" />
+);
 
-const Modal = () => {
+const Modal = ({ showModal }: { showModal: boolean }) => {
   const modal = useContext(ModalContext);
   const dispatch = useContext(ModalDispatchContext);
   return (
-    <div className="absolute left-0 right-0 top-0 bottom-0 bg-black/70 z-10">
+    <div
+      className={`${showModal ? "z-10 opacity-100 scale-100" : "-z-1 opacity-0 scale-0"} transition-all transition-discrete ease-out duration-500 absolute mx-auto left-0 right-0 bottom-0  top-0 bg-black/70 overflow-hidden`}
+    >
       <span className="flex justify-center lg:mx-auto lg:max-w-7xl xxl:max-w-[1440px] h-full w-full px-6 py-8 ">
         <span className="grid grid-cols-12 items-center">
-          <span className="flex flex-wrap relative items-center h-auto col-start-1 col-span-12 col-start-1 col-span-12 sm:col-span-6 sm:col-start-1 md:col-span-4 md:col-start-3 lg:col-span-4 lg:col-start-5 bg-white/90 rounded-md px-6 py-8 shadow-card">
+          <span
+            className={`${showModal ? "opacity-100 scale-100 translate-y-0" : "opacity-95 scale-0 translate-y-2"} transition-all transition-discrete delay-50 transform duration-600 ease-in-out flex flex-wrap relative items-center col-start-1 col-span-12 col-start-1 col-span-12 sm:col-span-6 sm:col-start-1 md:col-span-4 md:col-start-3 lg:col-span-4 lg:col-start-5 bg-white/90 rounded-md shadow-card  px-6 py-8`}
+          >
             <button
               role="button"
               onClick={dispatch ? () => dispatch(modal) : undefined}
@@ -20,14 +26,16 @@ const Modal = () => {
             >
               {iconClose}
             </button>
-            <h1 className="block text-h2 font-semibold text-center w-full">
+            <h1 className="block border-b-1 border-gray-300 mb-4 pb-4 text-h2 font-semibold text-center w-full">
               What is "Scout it out?"
             </h1>
-            <p>
+            <p className="mb-4">
               Scout it out is a business search application. It combines results
-              from Google and Foursquare to give you a quick way to find
-              businesses based on geographic location.
+              from Google and Foursquare to give you a quick way to search for
+              businesses (coffee shops, gyms, restaurants, etc) based on a
+              specific geographic location.
             </p>
+            <p>For additional info, click on the web links. Enjoy!</p>
           </span>
         </span>
       </span>

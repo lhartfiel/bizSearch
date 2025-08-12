@@ -92,7 +92,8 @@ function Home() {
       ref={elementRef}
       className="light-gradient dark-gradient flex flex-wrap justify-center items-between text-center h-full min-h-screen h-screen overflow-y-auto"
     >
-      {showModal && <Modal />}
+      {<Modal showModal={showModal} />}
+      {/* {showModal && <Modal />} */}
       <span className="lg:mx-auto lg:max-w-7xl xxl:max-w-[1440px] w-full px-6 py-8 ">
         <ThemeSwitch />
         <section className="mb-8">
