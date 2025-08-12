@@ -13,11 +13,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeContext, ThemeDispatchContext } from "../contexts/ThemeContext";
 import { ModalContext, ModalDispatchContext } from "../contexts/ModalContext";
 import { useReducer } from "react";
-import {
-  SearchResultContext,
-  SearchResultDispatchContext,
-} from "../contexts/SearchResultContext";
-import { resultsReducer } from "../contexts/SearchResultContext";
 import { initialSearchResult } from "../helpers/constants";
 
 const queryClient = new QueryClient();
@@ -84,7 +79,6 @@ function modalReducer(modalValue: boolean) {
 }
 
 function RootComponent() {
-  const [results, dispatch] = useReducer(resultsReducer, initialSearchResult);
   return (
     <RootDocument>
       <QueryClientProvider client={queryClient}>
