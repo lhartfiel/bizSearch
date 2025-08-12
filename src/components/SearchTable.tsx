@@ -21,9 +21,8 @@ const webIcon = (
 const columnHelper = createColumnHelper<searchResultPlacesType>();
 
 const isTouchDevice = () => {
-  return "ontouchstart" in document.documentElement;
+  return typeof window !== "undefined" && "ontouchstart" in window;
 };
-
 const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
   columnHelper.group({
     id: "search",
@@ -63,7 +62,7 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
           if (!info.getValue()) return "–";
           {
             return (
-              <span className="relative flex justify-center items-center w-full mt-2">
+              <span className="relative flex justify-center items-center w-full mt-2 z-10">
                 <Ratings rating={info.getValue()} />
                 <InfoBox
                   isTouch={isTouchDevice()}
@@ -82,7 +81,11 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
         id: "url",
         cell: (info) =>
           info.getValue() && isTouchDevice() ? (
-            <a href={info.getValue()}>{webIcon}</a>
+            <a href={info.getValue()} target="_blank">
+              {webIcon}
+            </a>
+          ) : info.getValue() ? (
+            webIcon
           ) : (
             "–"
           ),
@@ -140,10 +143,11 @@ const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
         <tbody className="w-full overflow-x-auto">
           {table.getRowModel().rows.map((row) => (
             <tr
-              role="button"
               key={row.id}
               tabIndex={0}
-              onClick={() => window.open(row.getValue("url"))}
+              onClick={() =>
+                !isTouchDevice() && window.open(row.getValue("url"))
+              }
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -154,8 +158,8 @@ const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
             >
               {row.getVisibleCells().map((cell) => (
                 <td
+                  key={cell.id}
                   {...{
-                    key: cell.id,
                     style: {
                       padding: "12px",
                       width: cell.column.getSize(),
