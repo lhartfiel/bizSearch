@@ -215,7 +215,7 @@ const SearchForm = memo(() => {
             {view === "table" && <SearchTable result={searchResults.places} />}
 
             {view === "card" && (
-              <div className="grid col-span-12 grid-cols-subgrid">
+              <div className="grid col-span-12 grid-cols-subgrid mt-4">
                 {searchResults?.places?.map(
                   (result: searchResultPlacesType, idx: number) => {
                     if (idx + 1 <= MAX_RESULTS * fetchMoreNum) {

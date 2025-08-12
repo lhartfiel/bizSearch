@@ -21,9 +21,8 @@ const webIcon = (
 const columnHelper = createColumnHelper<searchResultPlacesType>();
 
 const isTouchDevice = () => {
-  return "ontouchstart" in document.documentElement;
+  return typeof window !== "undefined" && "ontouchstart" in window;
 };
-
 const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
   columnHelper.group({
     id: "search",
@@ -63,7 +62,7 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
           if (!info.getValue()) return "–";
           {
             return (
-              <span className="relative flex justify-center items-center w-full mt-2">
+              <span className="relative flex justify-center items-center w-full mt-2 z-10">
                 <Ratings rating={info.getValue()} />
                 <InfoBox
                   isTouch={isTouchDevice()}
@@ -81,7 +80,15 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
       columnHelper.accessor((row) => row.webUrl, {
         id: "url",
         cell: (info) =>
-          info.getValue() ? <a href={info.getValue()}>{webIcon}</a> : "–",
+          info.getValue() && isTouchDevice() ? (
+            <a href={info.getValue()} target="_blank">
+              {webIcon}
+            </a>
+          ) : info.getValue() ? (
+            webIcon
+          ) : (
+            "–"
+          ),
         header: () => <span>Url</span>,
         size: 100,
       }),
@@ -135,11 +142,24 @@ const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
         </thead>
         <tbody className="w-full overflow-x-auto">
           {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="border-1 border-gray-200">
+            <tr
+              key={row.id}
+              tabIndex={0}
+              onClick={() =>
+                !isTouchDevice() && window.open(row.getValue("url"))
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  !isTouchDevice() && window.open(row.getValue("url"));
+                }
+              }}
+              className={`border-1 border-gray-200 bg-transparent transition duration-300 ${row.getValue("url") && "hover:cursor-pointer hover:font-semibold hover:shadow-md hover:bg-salmon/15 "}`}
+            >
               {row.getVisibleCells().map((cell) => (
                 <td
+                  key={cell.id}
                   {...{
-                    key: cell.id,
                     style: {
                       padding: "12px",
                       width: cell.column.getSize(),

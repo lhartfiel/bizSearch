@@ -18,7 +18,7 @@ const InfoBox = ({
   return (
     <>
       {showPopup && (
-        <div className="absolute popup bottom-[30px] right-0 popup bg-bright-salmon rounded-sm p-3 w-[180px] shadow-lg z-20">
+        <div className="absolute popup bottom-[30px] right-0 popup bg-bright-salmon rounded-sm p-3 w-[180px] shadow-lg z-40">
           <p className="leading-5 text-[16px] text-white">
             Rated <span className="font-black">{rating}</span> out of 5 based on
             a total of {ratingCount} ratings.
