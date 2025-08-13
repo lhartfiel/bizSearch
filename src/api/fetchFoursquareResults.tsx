@@ -36,7 +36,6 @@ export const fetchFoursquareResults = async (
       },
     };
   }
-
   const foursquareNewObj = foursquareJson.results.map(
     (item: foursquarePlaceType) => {
       const num = cleanedPhoneNum(item?.tel);
