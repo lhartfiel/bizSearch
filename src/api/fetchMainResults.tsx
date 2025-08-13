@@ -21,7 +21,7 @@ export const fetchMainResults = async (
   setIsEmpty: (value: boolean) => void,
 ) => {
   let lastError: { status: number; message: string } | null = null;
-  let nextGoogleToken = existingResults?.googleNextPage || "";
+  let nextGoogleToken = "";
   let fourNextPage = existingResults?.fourNextPage || "";
   const results: any[] = existingResults?.places || [];
 
@@ -37,28 +37,22 @@ export const fetchMainResults = async (
     } else {
       results.push(...(res.places || []));
       if (apiCall === "google") {
-        nextGoogleToken = res.googleNextPage || "";
+        nextGoogleToken = "";
       } else if (apiCall === "foursquare") {
         fourNextPage = res.fourNextPage || "";
       }
     }
   };
 
-  // Return ALL results from Google before fetching foursquare results
-  if (!fourNextPage && (nextResults === "initial" || nextGoogleToken)) {
-    const googleResponse = await fetchGoogleResults(
-      name,
-      location,
-      nextResults,
-      existingResults,
-    );
+  // Return first page of results from Google before fetching foursquare results
+  if (!fourNextPage && nextResults === "initial") {
+    const googleResponse = await fetchGoogleResults(name, location);
     handleResponse(googleResponse, "google");
   }
 
   /*
   If the results returned from the Google Response
-  are less than the max and does not have next page token,
-  fetch more by calling Foursquare
+  are less than the max, fetch more by calling Foursquare
   */
   if (!nextGoogleToken || lastError !== null) {
     const fsResults = await fetchFoursquareResults(

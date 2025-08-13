@@ -1,21 +1,10 @@
 import { cleanedPhoneNum } from "../helpers/helperFns";
 import { searchResultType, googlePlaceType } from "../helpers/constants";
 
-export const fetchGoogleResults = async (
-  name: string,
-  location: string,
-  initialNext: string,
-  existingResults: searchResultType | undefined,
-) => {
-  const nextParam =
-    initialNext === "initial" ? 0 : existingResults?.googleNextPage?.length;
-  const googleUrl =
-    nextParam && nextParam !== 0
-      ? `&pagetoken=${existingResults?.googleNextPage}`
-      : "";
+export const fetchGoogleResults = async (name: string, location: string) => {
   const googleTerm = name + location;
   const googleRes = await fetch(
-    `/api/googleSearch?searchTerm=${encodeURIComponent(googleTerm)}${googleUrl}`,
+    `/api/googleSearch?searchTerm=${encodeURIComponent(googleTerm)}`,
   );
   const googleJson = await googleRes.json();
   if (!googleRes.ok) {
@@ -25,6 +14,7 @@ export const fetchGoogleResults = async (
     };
   }
 
+  console.log("goog", googleJson);
   if (googleJson.error) {
     // Example: "400: Bad Request"
     const [statusCode, statusText] = googleJson.error.split(":");
@@ -36,7 +26,6 @@ export const fetchGoogleResults = async (
     };
   }
 
-  const googleNextPage = googleJson.nextPageToken;
   const googleNewObj = googleJson?.places.map((item: googlePlaceType) => {
     const num = cleanedPhoneNum(item?.phone);
 
@@ -48,11 +37,10 @@ export const fetchGoogleResults = async (
       address: item?.formatted_address,
       name: item?.name,
       phone: num,
-      price: item?.priceRange,
       rating: item?.rating,
       ratingCount: item?.user_ratings_total,
       webUrl: item?.webUrl,
     };
   });
-  return { places: googleNewObj, googleNextPage };
+  return { places: googleNewObj };
 };
