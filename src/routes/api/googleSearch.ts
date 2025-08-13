@@ -26,7 +26,7 @@ export const ServerRoute = createServerFileRoute("/api/googleSearch").methods({
 
     const searchData = await searchResponse.json();
     const results = searchData.results || [];
-    const topResults = results.slice(0, 4);
+    const topResults = results.slice(0, 4); // Use only the first 4 results from Google to limit charges fetching premium fields like website
 
     const placesWithDetails = await Promise.all(
       topResults.map(async (item: any, index: number) => {

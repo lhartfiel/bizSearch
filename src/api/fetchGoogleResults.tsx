@@ -14,7 +14,6 @@ export const fetchGoogleResults = async (name: string, location: string) => {
     };
   }
 
-  console.log("goog", googleJson);
   if (googleJson.error) {
     // Example: "400: Bad Request"
     const [statusCode, statusText] = googleJson.error.split(":");
