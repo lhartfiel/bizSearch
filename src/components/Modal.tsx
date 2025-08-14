@@ -43,10 +43,14 @@ const Modal = ({ showModal }: { showModal: boolean }) => {
               <p className="mb-4">
                 Scout it out is a business search application. It combines
                 results from Google and Foursquare to give you a quick way to
-                search for businesses (coffee shops, gyms, restaurants, etc)
-                based on a specific geographic location.
+                search for businesses (coffee shops, gyms, restaurants, etc.)
+                based on a specific geographic location. Please note that
+                ratings are only provided for Google results.
               </p>
-              <p>For additional info, click on the web links. Enjoy!</p>
+              <p>
+                For additional info about place, click on the web link provided.
+                Enjoy!
+              </p>
             </span>
           </FocusTrap>
         </span>
