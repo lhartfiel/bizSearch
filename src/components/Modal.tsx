@@ -27,7 +27,7 @@ const Modal = ({ showModal }: { showModal: boolean }) => {
           >
             <span
               id="modal-dialog"
-              className={`${showModal ? "opacity-100 scale-100 translate-y-0" : "opacity-95 scale-0 translate-y-2"} transition-all transition-discrete delay-50 transform duration-600 ease-in-out flex flex-wrap relative items-center col-start-1 col-span-12 col-start-1 col-span-12 sm:col-span-6 sm:col-start-1 md:col-span-4 md:col-start-3 lg:col-span-4 lg:col-start-5 bg-white/90 rounded-md shadow-card  px-6 py-8`}
+              className={`${showModal ? "opacity-100 scale-100 translate-y-0" : "opacity-95 scale-0 translate-y-2"} transition-all transition-discrete delay-50 transform duration-600 ease-in-out flex flex-wrap relative items-center col-start-1 col-span-12 col-start-1 col-span-12 sm:col-span-8 sm:col-start-3 md:col-span-6 md:col-start-4 lg:col-span-4 lg:col-start-5 bg-white/90 rounded-md shadow-card  px-6 py-8`}
             >
               <button
                 className="absolute right-5 top-5 cursor-pointer"
@@ -48,8 +48,8 @@ const Modal = ({ showModal }: { showModal: boolean }) => {
                 ratings are only provided for Google results.
               </p>
               <p>
-                For additional info about place, click on the web link provided.
-                Enjoy!
+                For additional info about a place, click on the web link
+                provided. Enjoy!
               </p>
             </span>
           </FocusTrap>
