@@ -16,6 +16,7 @@ const ThemeSwitch = () => {
   return (
     <div className="flex justify-end w-full mb-4">
       <button
+        aria-label="Info about Scout it Out"
         role="button"
         className="cursor-pointer bg-white dark:bg-slate-300 rounded-full w-9 h-9 border-1 border-slate-800 mr-4"
         onClick={modalDispatch ? () => modalDispatch(modal) : undefined}
@@ -23,6 +24,7 @@ const ThemeSwitch = () => {
         {infoIcon}
       </button>
       <button
+        aria-label="Toggle dark/light mode"
         role="button"
         className="cursor-pointer bg-white dark:bg-slate-300 rounded-full w-9 h-9 border-1 border-slate-800"
         onClick={themeDispatch ? () => themeDispatch(theme) : undefined}

@@ -12,10 +12,15 @@ import { NotFound } from "../components/NotFound";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeContext, ThemeDispatchContext } from "../contexts/ThemeContext";
 import { ModalContext, ModalDispatchContext } from "../contexts/ModalContext";
-import { useReducer } from "react";
-import { initialSearchResult } from "../helpers/constants";
+import { useEffect, useReducer } from "react";
 
 const queryClient = new QueryClient();
+
+function useHtmlLang(lang: string) {
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
+}
 
 export const Route = createRootRoute({
   head: () => ({
@@ -28,11 +33,22 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
+        name: "description",
+        content:
+          "A business search application returning info based name and geographic location",
+      },
+      {
         title: "Business Search",
       },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Akatab:wght@400;500;600;700;800;900&family=Borel&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap",
+      },
       {
         rel: "icon",
         type: "image/png",
@@ -79,6 +95,7 @@ function modalReducer(modalValue: boolean) {
 }
 
 function RootComponent() {
+  useHtmlLang("en");
   return (
     <RootDocument>
       <QueryClientProvider client={queryClient}>
