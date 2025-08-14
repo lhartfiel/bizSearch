@@ -111,89 +111,90 @@ const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
   });
 
   return (
-    <div className="col-start-1 col-span-12 md:col-start-2 md:col-span-10 lg:col-start-2 p-2 w-full max-w-full pt-4 overflow-y-auto overflow-x-auto">
-      <table className="shadow-card bg-white w-full rounded-[8px] overflow-hidden table-fixed md:table-auto">
-        <thead>
-          {table.getHeaderGroups().map(
-            (headerGroup, idx) =>
-              idx !== 0 && (
-                <tr
-                  key={headerGroup.id}
-                  className="bg-gray-300 shadow-sm uppercase"
-                >
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      style={{ width: header.getSize() }}
-                      className="font-semibold text-[16px] py-3"
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </th>
-                  ))}
-                </tr>
-              ),
-          )}
-        </thead>
-        <tbody className="w-full overflow-x-auto">
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              tabIndex={0}
-              onClick={() =>
-                !isTouchDevice() && window.open(row.getValue("url"))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  !isTouchDevice() && window.open(row.getValue("url"));
+    <div className="col-start-1 col-span-12 md:col-start-2 md:col-span-10 lg:col-start-2 w-full max-w-full relative rounded-lg shadow-card bg-white overflow-hidden my-4 z-20">
+      <div className="overflow-auto md:overflow-visible">
+        <table className="shadow-card bg-white w-full rounded-[8px] table-fixed md:table-auto font-akatab">
+          <thead>
+            {table.getHeaderGroups().map(
+              (headerGroup, idx) =>
+                idx !== 0 && (
+                  <tr
+                    key={headerGroup.id}
+                    className="bg-gray-300 shadow-sm uppercase"
+                  >
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        style={{ width: header.getSize() }}
+                        className="font-semibold text-[16px] py-5"
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </th>
+                    ))}
+                  </tr>
+                ),
+            )}
+          </thead>
+          <tbody className="w-full overflow-x-auto">
+            {table.getRowModel().rows.map((row) => (
+              <tr
+                key={row.id}
+                tabIndex={0}
+                onClick={() =>
+                  !isTouchDevice() && window.open(row.getValue("url"))
                 }
-              }}
-              className={`border-1 border-gray-200 bg-transparent transition duration-300 ${row.getValue("url") && "hover:cursor-pointer hover:font-semibold hover:shadow-md hover:bg-salmon/15 "}`}
-            >
-              {row.getVisibleCells().map((cell) => (
-                <td
-                  key={cell.id}
-                  {...{
-                    style: {
-                      padding: "12px",
-                      width: cell.column.getSize(),
-                    },
-                  }}
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-        <tfoot>
-          {table.getFooterGroups().map((footerGroup) => (
-            <tr key={footerGroup.id}>
-              {footerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  colSpan={header.colSpan}
-                  className={`${header.isPlaceholder} ? '' : 'py-2'`}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.footer,
-                        header.getContext(),
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </tfoot>
-      </table>
-      <div className="h-4" />
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    !isTouchDevice() && window.open(row.getValue("url"));
+                  }
+                }}
+                className={`border-1 border-gray-200 bg-transparent transition duration-300 ${row.getValue("url") && "hover:cursor-pointer hover:font-semibold hover:shadow-md hover:bg-salmon/15 "}`}
+              >
+                {row.getVisibleCells().map((cell) => (
+                  <td
+                    key={cell.id}
+                    {...{
+                      style: {
+                        padding: "12px",
+                        width: cell.column.getSize(),
+                      },
+                    }}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            {table.getFooterGroups().map((footerGroup) => (
+              <tr key={footerGroup.id}>
+                {footerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    className={`${header.isPlaceholder} ? '' : 'py-2'`}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.footer,
+                          header.getContext(),
+                        )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </tfoot>
+        </table>
+      </div>
     </div>
   );
 };

@@ -58,6 +58,7 @@ const SearchForm = memo(() => {
       ),
     enabled: isSubmitted, // disable autofetching
     refetchOnWindowFocus: false, // prevent background refresh
+    staleTime: 1000 * 60 * 60 * 24,
     gcTime: 1000 * 60 * 60 * 24, // keeps cache in memory for 24 hours
     retry: (failureCount, error) => {
       const status = (error as any)?.status;

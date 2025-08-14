@@ -29,27 +29,24 @@ export const ServerRoute = createServerFileRoute("/api/googleSearch").methods({
     const topResults = results.slice(0, 4); // Use only the first 4 results from Google to limit charges fetching premium fields like website
 
     const placesWithDetails = await Promise.all(
-      topResults.map(async (item: any, index: number) => {
-        if (index < 4) {
-          try {
-            const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${item.place_id}&fields=formatted_phone_number,website&key=${API_KEY}`;
-            const detailResponse = await fetch(detailUrl);
+      topResults.map(async (item: any) => {
+        try {
+          const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${item.place_id}&fields=formatted_phone_number,website&key=${API_KEY}`;
+          const detailResponse = await fetch(detailUrl);
+          const detailData = await detailResponse.json();
 
-            if (!detailResponse.ok) {
-              throw new Error(`HTTP error! status: ${detailResponse.status}`);
-            }
-
-            const detailData = await detailResponse.json();
-
-            return {
-              ...item,
-              phone: detailData.result?.formatted_phone_number || null,
-              webUrl: detailData.result?.website || null,
-            };
-          } catch (err) {
-            console.error(`Failed fetching details for ${item.place_id}`, err);
-            return { ...item, phone: null, webUrl: null };
+          if (!detailResponse.ok) {
+            throw new Error(`HTTP error! status: ${detailResponse.status}`);
           }
+
+          return {
+            ...item,
+            phone: detailData.result?.formatted_phone_number || null,
+            webUrl: detailData.result?.website || null,
+          };
+        } catch (err) {
+          console.error(`Failed fetching details for ${item.place_id}`, err);
+          return { ...item, phone: null, webUrl: null };
         }
       }),
     );
