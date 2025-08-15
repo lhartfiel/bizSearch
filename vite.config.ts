@@ -4,6 +4,7 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import tanstackRouter from "@tanstack/router-plugin/vite";
 
 export default defineProject({
   test: {
@@ -16,9 +17,10 @@ export default defineProject({
     port: 3000,
   },
   plugins: [
+    tanstackRouter(),
     tsConfigPaths(),
-    react(),
     tailwindcss(),
     tanstackStart({ customViteReactPlugin: true }),
+    react(),
   ],
 });
