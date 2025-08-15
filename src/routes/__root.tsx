@@ -74,6 +74,19 @@ export const Route = createRootRoute({
         href: "/site.webmanifest",
       },
     ],
+    scripts: [
+      {
+        src: "https://www.googletagmanager.com/gtag/js?id=G-QN8Y9Z8M3M",
+        async: true,
+      },
+      {
+        children: `window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+
+              gtag('config', 'G-QN8Y9Z8M3M');`,
+      },
+    ],
   }),
   notFoundComponent: () => <NotFound />,
   component: RootComponent,
