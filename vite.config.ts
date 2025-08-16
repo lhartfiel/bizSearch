@@ -4,23 +4,27 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import tanstackRouter from "@tanstack/router-plugin/vite";
 
-export default defineProject({
-  test: {
-    globals: true,
-    include: ["**/*.{test,spec}.?(c|m)[jt]s?(x)"],
-    environment: "jsdom",
-    setupFiles: "./vitest-setup.js",
-  },
-  server: {
-    port: 3000,
-  },
-  plugins: [
-    tanstackRouter(),
-    tsConfigPaths(),
-    tailwindcss(),
-    tanstackStart({ customViteReactPlugin: true }),
-    react(),
-  ],
+export default defineProject(({ command, mode }) => {
+  const isTest = mode === "test"; // don't run tanstack start in test mode because it can't find hooks
+  return {
+    optimizeDeps: {
+      include: ["react", "react-dom"],
+    },
+    test: {
+      globals: true,
+      include: ["**/*.{test,spec}.?(c|m)[jt]s?(x)"],
+      environment: "jsdom",
+      setupFiles: "./vitest-setup.ts",
+    },
+    server: {
+      port: 3000,
+    },
+    plugins: [
+      tsConfigPaths(),
+      tailwindcss(),
+      ...(!isTest ? [tanstackStart({ customViteReactPlugin: true })] : []),
+      react(),
+    ],
+  };
 });
