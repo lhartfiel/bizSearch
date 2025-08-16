@@ -4,6 +4,7 @@ import tsConfigPaths from "vite-tsconfig-paths";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import legacy from "@vitejs/plugin-legacy";
 
 export default defineProject(({ command, mode }) => {
   const isTest = mode === "test"; // don't run tanstack start in test mode because it can't find hooks
@@ -25,6 +26,10 @@ export default defineProject(({ command, mode }) => {
       tailwindcss(),
       ...(!isTest ? [tanstackStart({ customViteReactPlugin: true })] : []),
       react(),
+      legacy({
+        targets: ["defaults", "not IE 11"], //polyfill for older browsers
+        additionalLegacyPolyfills: ["regenerator-runtime/runtime"],
+      }),
     ],
   };
 });
