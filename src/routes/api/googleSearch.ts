@@ -22,7 +22,11 @@ export const ServerRoute = createServerFileRoute("/api/googleSearch").methods({
           "X-Goog-FieldMask":
             "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.websiteUri",
         },
-        body: JSON.stringify({ textQuery: searchTerm }),
+        body: JSON.stringify({
+          textQuery: searchTerm,
+          pageSize: 10,
+          rankPreference: "RELEVANCE",
+        }),
       });
     };
     const searchResponse = await callFetch();
