@@ -5,5 +5,6 @@ export const dedupResponses = (responses) => {
 };
 
 export const cleanedPhoneNum = (num: string) => {
-  return num?.replace(/[^\d+]/g, "");
+  if (!num) return "";
+  return num.replace(/[^\d]/g, "");
 };

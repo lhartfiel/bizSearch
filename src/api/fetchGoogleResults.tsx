@@ -1,5 +1,5 @@
 import { cleanedPhoneNum } from "../helpers/helperFns";
-import { searchResultType, googlePlaceType } from "../helpers/constants";
+import { googlePlaceType } from "../helpers/constants";
 
 export const fetchGoogleResults = async (name: string, location: string) => {
   const googleTerm = name + location;
@@ -26,19 +26,19 @@ export const fetchGoogleResults = async (name: string, location: string) => {
   }
 
   const googleNewObj = googleJson?.places.map((item: googlePlaceType) => {
-    const num = cleanedPhoneNum(item?.phone);
-
-    if (!item.formatted_address && !item?.name) {
+    const phoneRaw = item?.nationalPhoneNumber || "";
+    const num = cleanedPhoneNum(phoneRaw);
+    if (!item.formattedAddress && !item?.displayName.text) {
       // Don't return any results if there isn't an address or name
       return;
     }
     return {
-      address: item?.formatted_address,
-      name: item?.name,
-      phone: num,
+      address: item?.formattedAddress,
+      name: item?.displayName.text,
+      phone: num ?? "",
       rating: item?.rating,
-      ratingCount: item?.user_ratings_total,
-      webUrl: item?.webUrl,
+      ratingCount: item?.userRatingCount,
+      webUrl: item?.websiteUri,
     };
   });
   return { places: googleNewObj };
