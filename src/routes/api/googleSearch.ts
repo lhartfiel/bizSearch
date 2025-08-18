@@ -31,7 +31,15 @@ export const ServerRoute = createServerFileRoute("/api/googleSearch").methods({
     };
     const searchResponse = await callFetch();
     if (!searchResponse?.ok) {
-      throw new Error(`Error: ${searchResponse?.status}`);
+      return new Response(
+        JSON.stringify({
+          error: `${searchResponse.status}: ${searchResponse.statusText}`,
+        }),
+        {
+          status: searchResponse.status,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     const searchData = await searchResponse.json();
