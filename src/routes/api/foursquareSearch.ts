@@ -21,8 +21,15 @@ export const ServerRoute = createServerFileRoute(
       },
     });
     if (!response?.ok) {
-      return { error: `${response?.status}: ${response.statusText}` };
-      // throw new Error(`Error: ${response?.status}: ${response.statusText}`);
+      return new Response(
+        JSON.stringify({
+          error: `${response.status}: ${response.statusText}`,
+        }),
+        {
+          status: response.status,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     const link = response?.headers?.get("link");
