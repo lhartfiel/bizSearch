@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "test": "vitest --environment jsdom",
+    "test": "vitest",
     "coverage": "vitest run --coverage"
   },
   "keywords": [],
