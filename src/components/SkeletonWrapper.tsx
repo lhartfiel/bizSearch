@@ -1,10 +1,11 @@
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
-import { PropsWithChildren, useId } from "react";
+import { PropsWithChildren } from "react";
 import "react-loading-skeleton/dist/skeleton.css";
 
 function Box({ children }: PropsWithChildren<unknown>) {
   return (
     <div
+      data-testid="skeleton-wrapper"
       style={{
         borderRadius: "8px",
         display: "flex flex-wrap",
@@ -22,19 +23,19 @@ const skeletonData = [
   {
     name: "title",
     height: 16,
-    customClass: "mb-4 w-full",
+    customClass: "sk-title mb-4 w-full",
     count: 1,
   },
   {
     name: "body",
     height: 11,
-    customClass: "flex-wrap w-full mb-2",
+    customClass: "sk-body flex-wrap w-full mb-2",
     count: 2,
   },
   {
     name: "stars",
     height: 11,
-    customClass: "mr-0 ml-auto w-1/3 mt-3",
+    customClass: "sk-stars mr-0 ml-auto w-1/3 mt-3",
     count: 1,
   },
 ];
@@ -46,14 +47,16 @@ const SkeletonWrapper = () => {
         <Box>
           {skeletonData.map((skeleton, idx) => {
             return (
-              <Skeleton
-                key={`${skeleton.name}-${idx}`}
-                height={skeleton.height}
-                baseColor="#d1d5db"
-                highlightColor="#9ca3af"
-                containerClassName={`flex ${skeleton.customClass}`}
-                count={skeleton.count}
-              />
+              <div data-testid={`skeleton-${skeleton.name}`}>
+                <Skeleton
+                  key={`${skeleton.name}-${idx}`}
+                  height={skeleton.height}
+                  baseColor="#d1d5db"
+                  highlightColor="#9ca3af"
+                  containerClassName={`flex ${skeleton.customClass}`}
+                  count={skeleton.count}
+                />
+              </div>
             );
           })}
         </Box>

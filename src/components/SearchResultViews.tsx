@@ -28,9 +28,8 @@ const SearchResultViews = ({
           <button
             key={vw.type}
             type="button"
-            aria-label={`{vw.type} view`}
+            aria-label={`${vw.type} view`}
             onClick={() => handleViewChange(vw.type)}
-            role="button"
             className={`${view === vw.type ? "bg-bright-salmon" : "bg-salmon/20 dark:bg-salmon/40 hover:shadow-md"} cursor-pointer p-2 rounded-sm w-[60px] ${vw.customClass}`}
           >
             <FontAwesomeIcon
