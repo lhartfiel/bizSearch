@@ -64,7 +64,7 @@ describe("Modal component", () => {
     const paragraphs = screen.getByRole("dialog").querySelectorAll("p");
     expect(paragraphs).toHaveLength(2);
     expect(paragraphs[0]).toHaveTextContent(/business search application/);
-    expect(paragraphs[1]).toHaveTextContent(/click on the web links/);
+    expect(paragraphs[1]).toHaveTextContent(/click on the web link/);
   });
   it("should trigger a click event when the close button is clicked", () => {
     const { dispatch } = renderModal(true);

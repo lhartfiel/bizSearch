@@ -10,53 +10,44 @@ export const ServerRoute = createServerFileRoute("/api/googleSearch").methods({
       return { places: [] }; // Return empty results if no search term
     }
 
-    const params = new URLSearchParams({
-      query: searchTerm,
-      key: API_KEY!,
-    });
-
-    // Use the legacy Places API -- don't fetch additional pages from Google
+    // Use the new Places API -- don't fetch additional pages from Google
     // Google Places API charges per call for premium fields like website url, phone and ratings
-    const searchResponse = await fetch(
-      `https://maps.googleapis.com/maps/api/place/textsearch/json?${params}`,
-    );
+    const searchApi = `https://places.googleapis.com/v1/places:searchText`;
+    const callFetch = async () => {
+      return await fetch(searchApi, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": `${API_KEY}`,
+          "X-Goog-FieldMask":
+            "places.displayName,places.formattedAddress,places.nationalPhoneNumber,places.rating,places.userRatingCount,places.websiteUri",
+        },
+        body: JSON.stringify({
+          textQuery: searchTerm,
+          pageSize: 10,
+          rankPreference: "RELEVANCE",
+        }),
+      });
+    };
+    const searchResponse = await callFetch();
     if (!searchResponse?.ok) {
-      throw new Error(`Error: ${searchResponse?.status}`);
+      return new Response(
+        JSON.stringify({
+          error: `${searchResponse.status}: ${searchResponse.statusText}`,
+        }),
+        {
+          status: searchResponse.status,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     const searchData = await searchResponse.json();
-    const results = searchData.results || [];
-    const topResults = results.slice(0, 4); // Use only the first 4 results from Google to limit charges fetching premium fields like website
-
-    const placesWithDetails = await Promise.all(
-      topResults.map(async (item: any, index: number) => {
-        if (index < 4) {
-          try {
-            const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${item.place_id}&fields=formatted_phone_number,website&key=${API_KEY}`;
-            const detailResponse = await fetch(detailUrl);
-
-            if (!detailResponse.ok) {
-              throw new Error(`HTTP error! status: ${detailResponse.status}`);
-            }
-
-            const detailData = await detailResponse.json();
-
-            return {
-              ...item,
-              phone: detailData.result?.formatted_phone_number || null,
-              webUrl: detailData.result?.website || null,
-            };
-          } catch (err) {
-            console.error(`Failed fetching details for ${item.place_id}`, err);
-            return { ...item, phone: null, webUrl: null };
-          }
-        }
-      }),
-    );
+    const results = searchData.places || [];
 
     return new Response(
       JSON.stringify({
-        places: placesWithDetails,
+        places: results,
       }),
       {
         status: 200,
