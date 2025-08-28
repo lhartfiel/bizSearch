@@ -12,7 +12,7 @@ export interface googlePlaceType {
   displayName: {
     text: string;
   };
-  nationalPhoneNumber: string;
+  nationalPhoneNumber: string | null | undefined;
   rating: number | string;
   userRatingCount: number;
   websiteUri: string;
@@ -23,7 +23,7 @@ export interface foursquarePlaceType {
   location: {
     formatted_address: string;
   };
-  tel: string;
+  tel: string | null | undefined;
   rating: number | string;
   website: string;
 }
@@ -31,7 +31,7 @@ export interface foursquarePlaceType {
 export interface searchResultPlacesType {
   address: string;
   name: string;
-  phone?: string;
+  phone?: string | null | undefined;
   price?: string;
   rating?: string;
   ratingCount?: number | undefined;
