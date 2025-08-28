@@ -1,4 +1,5 @@
-export const dedupResponses = (responses) => {
+import { searchResultPlacesType } from "./constants";
+export const dedupResponses = (responses: [searchResultPlacesType] | []) => {
   return responses.filter((obj, index, self) => {
     return index === self.findIndex((t) => t.phone === obj.phone);
   });
