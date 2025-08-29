@@ -1,4 +1,4 @@
-const errorMessages: Record<number, string> = {
+export const errorMessages: Record<number, string> = {
   400: "Invalid request. Please check your input and try again.",
   401: "Unauthorized. Please log in to continue.",
   403: "Access denied. You don't have permission.",
