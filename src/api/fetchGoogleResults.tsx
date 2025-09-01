@@ -25,21 +25,25 @@ export const fetchGoogleResults = async (name: string, location: string) => {
     };
   }
 
-  const googleNewObj = googleJson?.places.map((item: googlePlaceType) => {
-    const phoneRaw = item?.nationalPhoneNumber || "";
-    const num = cleanedPhoneNum(phoneRaw);
-    if (!item.formattedAddress && !item?.displayName.text) {
-      // Don't return any results if there isn't an address or name
-      return;
-    }
-    return {
-      address: item?.formattedAddress,
-      name: item?.displayName.text,
-      phone: num ?? "",
-      rating: item?.rating,
-      ratingCount: item?.userRatingCount,
-      webUrl: item?.websiteUri,
-    };
-  });
+  const googleNewObj = googleJson?.places
+    .filter((item: googlePlaceType) => {
+      return (
+        !!item.displayName?.text &&
+        !!item.formattedAddress &&
+        (!!item.nationalPhoneNumber || !!item.websiteUri)
+      );
+    })
+    .map((item: googlePlaceType) => {
+      const phoneRaw = item.nationalPhoneNumber || "";
+      const num = cleanedPhoneNum(phoneRaw);
+      return {
+        address: item.formattedAddress,
+        name: item.displayName.text,
+        phone: num ?? "",
+        rating: item.rating,
+        ratingCount: item.userRatingCount,
+        webUrl: item.websiteUri,
+      };
+    });
   return { places: googleNewObj };
 };

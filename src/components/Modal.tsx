@@ -15,7 +15,7 @@ const Modal = ({ showModal }: { showModal: boolean }) => {
   return (
     <div
       data-testid="modal-wrapper"
-      className={`${showModal ? "z-10 opacity-100 scale-100" : "-z-1 opacity-0 scale-0"} transition-all transition-discrete ease-out duration-500 absolute mx-auto left-0 right-0 bottom-0 top-0 bg-gray-900/95 overflow-hidden`}
+      className={`${showModal ? "z-30 opacity-100 scale-100" : "-z-1 opacity-0 scale-0"} transition-all transition-discrete ease-out duration-500 absolute mx-auto left-0 right-0 bottom-0 top-0 bg-gray-900/95 overflow-hidden`}
     >
       <span className="flex justify-center lg:mx-auto lg:max-w-7xl xxl:max-w-[1440px] h-full w-full px-6 py-8 ">
         <span className="grid grid-cols-12 items-center">

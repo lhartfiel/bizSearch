@@ -213,7 +213,14 @@ const SearchForm = memo(() => {
               handleViewChange={handleViewChange}
               view={view}
             />
-            {view === "table" && <SearchTable result={searchResults.places} />}
+            {view === "table" && (
+              <SearchTable
+                result={searchResults.places.slice(
+                  0,
+                  MAX_RESULTS * fetchMoreNum,
+                )}
+              />
+            )}
 
             {view === "card" && (
               <div className="grid col-span-12 grid-cols-subgrid mt-4">
