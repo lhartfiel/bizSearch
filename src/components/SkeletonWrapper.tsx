@@ -47,9 +47,11 @@ const SkeletonWrapper = () => {
         <Box>
           {skeletonData.map((skeleton, idx) => {
             return (
-              <div data-testid={`skeleton-${skeleton.name}`}>
+              <div
+                data-testid={`skeleton-${skeleton.name}`}
+                key={`${skeleton.name}-${idx}`}
+              >
                 <Skeleton
-                  key={`${skeleton.name}-${idx}`}
                   height={skeleton.height}
                   baseColor="#d1d5db"
                   highlightColor="#9ca3af"
