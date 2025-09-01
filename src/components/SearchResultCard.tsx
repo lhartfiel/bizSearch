@@ -67,7 +67,7 @@ const SearchResultCard = memo(
               className="text-body leading-body mb-2"
             >
               <span
-                data-testId="address-icon"
+                data-testid="address-icon"
                 className="absolute w-[18px] h-[18px]"
               >
                 {locationIcon}

@@ -97,14 +97,9 @@ const defaultColumns: ColumnDef<searchResultPlacesType>[] = [
 ];
 
 const SearchTable = ({ result }: { result: searchResultPlacesType[] }) => {
-  const [data, _setData] = useState(() => [...result]);
   const [columns] = useState<typeof defaultColumns>(() => [...defaultColumns]);
-
-  useEffect(() => {
-    _setData([...result]);
-  }, [result]);
   const table = useReactTable({
-    data,
+    data: result,
     columns,
     getCoreRowModel: getCoreRowModel(),
     columnResizeMode: "onChange",

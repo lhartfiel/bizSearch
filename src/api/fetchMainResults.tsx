@@ -72,7 +72,6 @@ export const fetchMainResults = async (
   }
 
   setIsEmpty(combinedResults.length === 0);
-
   return {
     places: combinedResults,
     googleNextPage: nextGoogleToken,

@@ -36,23 +36,24 @@ export const fetchFoursquareResults = async (
       },
     };
   }
-  const foursquareNewObj = foursquareJson.results.map(
-    (item: foursquarePlaceType) => {
-      const num = cleanedPhoneNum(item?.tel);
-
-      if (!item.location.formatted_address && !item.name) {
-        return;
-      }
-
+  const foursquareNewObj = foursquareJson.results
+    .filter((item: foursquarePlaceType) => {
+      return (
+        !!item.name &&
+        !!item.location.formatted_address &&
+        (!!item.tel || !!item.website)
+      );
+    })
+    .map((item: foursquarePlaceType) => {
+      const num = cleanedPhoneNum(item.tel ?? "");
       return {
-        name: item?.name,
-        address: item?.location.formatted_address,
+        name: item.name,
+        address: item.location.formatted_address,
         phone: num,
-        rating: item?.rating,
-        webUrl: item?.website,
+        rating: item.rating,
+        webUrl: item.website,
       };
-    },
-  );
+    });
 
   return {
     places: foursquareNewObj,
