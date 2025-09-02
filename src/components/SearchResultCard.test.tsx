@@ -23,7 +23,6 @@ describe("SearchResultCard component", () => {
 
     render(<SearchResultCard result={mockResult} />);
     const linkWrapper = screen.getByTestId("card-wrapper");
-    screen.debug();
     expect(linkWrapper).toBeInTheDocument();
     expect(linkWrapper).toHaveAttribute("href", mockResult.webUrl);
     expect(linkWrapper).toHaveAttribute("rel", "noopener noreferrer");
@@ -34,7 +33,6 @@ describe("SearchResultCard component", () => {
 
     render(<SearchResultCard result={mockResult} />);
     const linkWrapper = screen.getByTestId("card-wrapper");
-    screen.debug();
     expect(linkWrapper).toBeInTheDocument();
     expect(linkWrapper).not.toHaveAttribute("href");
     expect(linkWrapper.tagName).toBe("DIV");
