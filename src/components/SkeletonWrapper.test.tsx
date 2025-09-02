@@ -1,5 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
 import { SkeletonWrapper } from "./SkeletonWrapper";
 
@@ -23,7 +22,6 @@ describe("SkeletonWrapper component", () => {
     render(<SkeletonWrapper />);
     const starWrapper = screen.getByTestId("skeleton-stars");
     const star = starWrapper.querySelector("span");
-    screen.debug();
     expect(star).toBeInTheDocument();
     expect(star).toHaveClass("w-1/3");
   });
