@@ -10,53 +10,62 @@ export const fetchFoursquareResults = async (
   const foursquareUrl = existingResults?.fourNextPage?.length
     ? `&fourNextPage=${existingResults.fourNextPage}`
     : "";
-  const foursquareRes = await fetch(
-    `/api/foursquareSearch?name=${encodeURIComponent(name)}&location=${location}${foursquareUrl}`,
-  );
+  try {
+    const foursquareRes = await fetch(
+      `/api/foursquareSearch?name=${encodeURIComponent(name)}&location=${location}${foursquareUrl}`,
+    );
 
-  if (!foursquareRes.ok) {
-    console.error("Foursquare fetch failed:", foursquareRes.statusText);
-    return {
-      error: {
-        status: foursquareRes.status,
-        statusText: foursquareRes.statusText,
-      },
-    };
-  }
-
-  const foursquareJson = await foursquareRes.json();
-
-  if (foursquareJson.error) {
-    // Example: "400: Bad Request"
-    const [statusCode, statusText] = foursquareJson.error.split(":");
-    return {
-      error: {
-        status: +statusCode || 500,
-        statusText: statusText?.trim() || "Unknown API error",
-      },
-    };
-  }
-  const foursquareNewObj = foursquareJson.results
-    .filter((item: foursquarePlaceType) => {
-      return (
-        !!item.name &&
-        !!item.location.formatted_address &&
-        (!!item.tel || !!item.website)
-      );
-    })
-    .map((item: foursquarePlaceType) => {
-      const num = cleanedPhoneNum(item.tel ?? "");
+    if (!foursquareRes.ok) {
+      console.error("Foursquare fetch failed:", foursquareRes.statusText);
       return {
-        name: item.name,
-        address: item.location.formatted_address,
-        phone: num,
-        rating: item.rating,
-        webUrl: item.website,
+        error: {
+          status: foursquareRes.status,
+          statusText: foursquareRes.statusText,
+        },
       };
-    });
+    }
 
-  return {
-    places: foursquareNewObj,
-    fourNextPage: foursquareJson.nextPageToken || "",
-  };
+    const foursquareJson = await foursquareRes.json();
+
+    if (foursquareJson.error) {
+      // Example: "400: Bad Request"; API response still returns a 200 status
+      const [statusCode, statusText] = foursquareJson.error.split(":");
+      return {
+        error: {
+          status: +statusCode || 500,
+          statusText: statusText?.trim() || "Unknown API error",
+        },
+      };
+    }
+    const foursquareNewObj = foursquareJson.results
+      ? foursquareJson.results
+          .filter((item: foursquarePlaceType) => {
+            return (
+              !!item.name &&
+              !!item.location.formatted_address &&
+              (!!item.tel || !!item.website)
+            );
+          })
+          .map((item: foursquarePlaceType) => {
+            const num = cleanedPhoneNum(item.tel ?? "");
+            return {
+              name: item.name,
+              address: item.location.formatted_address,
+              phone: num,
+              rating: item.rating,
+              webUrl: item.website,
+            };
+          })
+      : [];
+
+    return {
+      places: foursquareNewObj,
+      fourNextPage: foursquareJson.nextPageToken || "",
+    };
+  } catch (err) {
+    console.error("Foursquare fetch error:", err);
+    return {
+      error: { status: 500, statusText: "Network failure" },
+    };
+  }
 };
