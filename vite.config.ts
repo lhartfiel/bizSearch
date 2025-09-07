@@ -14,7 +14,14 @@ export default defineProject(({ command, mode }) => {
     },
     test: {
       globals: true,
+      all: false,
       include: ["**/*.{test,spec}.?(c|m)[jt]s?(x)"],
+      exclude: [
+        "src/routeTree.gen.ts", // auto-generated route tree
+        "src/router.tsx",
+        "src/constants.ts",
+        "node_modules/**",
+      ],
       environment: "jsdom",
       setupFiles: "./vitest-setup.ts",
     },
