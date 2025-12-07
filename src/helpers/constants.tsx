@@ -42,6 +42,7 @@ export interface fetchResponseType extends searchResultType {
   error?: { status: number; statusText: string };
 }
 
+/* istanbul ignore file */
 export const MAX_RESULTS = 25; // Max results per page
 export const initialSearchResult: searchResultType = {
   places: [],

@@ -1,6 +1,67 @@
 import { http, HttpResponse } from "msw";
 
 export const handlers = [
+  http.get(`/api/foursquareSearch`, ({ request }) => {
+    const url = new URL(request.url);
+
+    const name = url.searchParams.get("name");
+    const location = url.searchParams.get("location");
+    const fourNextPage = url.searchParams.get("fourNextPage");
+
+    if (name === "coffee" && location === "Seattle, WA") {
+      return HttpResponse.json({
+        results: [
+          {
+            name: "The Coffee Bean",
+            location: {
+              formatted_address: "123 Main Street, Seattle, WA 98101",
+            },
+            tel: "(123) 456-7890",
+            website: "https://thecoffeebean.com",
+            nextPageToken: fourNextPage || null,
+          },
+        ],
+      });
+    }
+
+    if (name === "coffee & tea" && location === "Seattle, WA / Downtown") {
+      return HttpResponse.json({
+        name: "Tea & Coffee Place",
+        location: { formatted_address: "456 Special Street, Seattle, WA" },
+        tel: "(111) 222-3333",
+        website: "https://teaandcoffee.com",
+        nextPageToken: fourNextPage || null,
+      });
+    }
+
+    if (name === "network-error") {
+      return Response.error(); // will be caught by the try/catch in the route
+    }
+
+    if (name === "malformed-json") {
+      return HttpResponse.json({ foo: "bar" }); // missing 'results'
+    }
+
+    if (name === "incomplete-results") {
+      return HttpResponse.json({
+        results: [
+          {
+            name: "Valid Place",
+            location: { formatted_address: "123 St" },
+            tel: "123",
+            website: null,
+          },
+          {
+            name: "",
+            location: { formatted_address: "123 St" },
+            tel: "123",
+            website: null,
+          },
+        ],
+      });
+    }
+  }),
+
   http.post(
     "https://places.googleapis.com/v1/places:searchText",
     async ({ request }) => {
