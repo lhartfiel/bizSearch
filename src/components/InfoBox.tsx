@@ -10,7 +10,7 @@ export interface InfoboxType {
 }
 
 const InfoBox = ({ isTouch, rating, ratingCount, showHover }: InfoboxType) => {
-  const [showPopup, setShowPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState<boolean>(false);
 
   return (
     <>
